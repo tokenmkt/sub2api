@@ -285,9 +285,6 @@ import { useAppStore } from '@/stores'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { useClipboard } from '@/composables/useClipboard'
-import chatgptLogo from '../../../assets/partners/logos/ChatGPT.png'
-import claudeLogo from '../../../assets/partners/logos/Claude.png'
-import geminiLogo from '../../../assets/partners/logos/Gemini.jpg'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -298,6 +295,9 @@ const siteLogo = computed(() => appStore.cachedPublicSettings?.site_logo || appS
 const docUrl = computed(() => appStore.cachedPublicSettings?.doc_url || appStore.docUrl || '')
 const isDark = ref(document.documentElement.classList.contains('dark'))
 const currentYear = computed(() => new Date().getFullYear())
+const chatgptLogo = '/ChatGPT.png'
+const claudeLogo = '/Claude.png'
+const geminiLogo = '/Gemini.jpg'
 
 function toggleTheme() {
   isDark.value = !isDark.value
