@@ -13,6 +13,11 @@ if [ "$(id -u)" = "0" ]; then
     exec su-exec sub2api "$0" "$@"
 fi
 
+# Railway injects PORT for the listening port, while Sub2API reads SERVER_PORT.
+if [ -z "${SERVER_PORT:-}" ] && [ -n "${PORT:-}" ]; then
+    export SERVER_PORT="${PORT}"
+fi
+
 # Compatibility: if the first arg looks like a flag (e.g. --help),
 # prepend the default binary so it behaves the same as the old
 # ENTRYPOINT ["/app/sub2api"] style.
