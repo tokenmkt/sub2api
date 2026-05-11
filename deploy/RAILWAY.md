@@ -1,4 +1,4 @@
-# Sub2API on Railway
+# tokenMKT on Railway
 
 This repo can be deployed into the existing Railway `tokenmkt` project as a
 single code-deployed service backed by dedicated Railway managed PostgreSQL and
@@ -9,11 +9,11 @@ Redis services.
 Create these services in the `tokenmkt` project:
 
 - `sub2api`: GitHub/code deployment for this repository.
-- `sub2api-pg`: Railway managed PostgreSQL for Sub2API only.
-- `sub2api-redis`: Railway managed Redis for Sub2API only.
+- `sub2api-pg`: Railway managed PostgreSQL for tokenMKT only.
+- `sub2api-redis`: Railway managed Redis for tokenMKT only.
 
 Do not share the existing `tokenmkt` Postgres or Redis services for a
-high-traffic Sub2API deployment. Sub2API is a gateway workload with hot Redis
+high-traffic tokenMKT deployment. tokenMKT is a gateway workload with hot Redis
 keys, request scheduling state, rate limits, session affinity, usage logs, and
 monitoring writes; keeping its data services separate avoids latency, connection,
 memory, and I/O contention with the storefront stack.
@@ -89,7 +89,7 @@ LOG_OUTPUT_TO_FILE=false
 ```
 
 OAuth, payment, Turnstile, and model-provider secrets can be added later from
-the Sub2API admin console or Railway variables.
+the tokenMKT admin console or Railway variables.
 
 ## Deploy
 
@@ -114,9 +114,9 @@ After first boot, confirm `https://<domain>/health` returns 200 and log in with
 
 ## Notes
 
-- Do not reuse the root `railway/manage.sh` flow for Sub2API; it is written for
+- Do not reuse the root `railway/manage.sh` flow for tokenMKT; it is written for
   the existing `dujiaonext` `api/user/admin` stack.
-- Keep the `/app/data` volume attached. Sub2API writes `config.yaml`, the setup
+- Keep the `/app/data` volume attached. tokenMKT writes `config.yaml`, the setup
   lock, logs, and runtime data there.
 - `JWT_SECRET` and `TOTP_ENCRYPTION_KEY` should stay fixed across redeploys.
   Rotating them invalidates sessions and existing 2FA/payment encrypted data.
