@@ -9,89 +9,57 @@ export default {
     dashboard: 'Dashboard',
     login: 'Login',
     getStarted: 'Get Started',
+    installGuide: 'Install Guide',
     goToDashboard: 'Go to Dashboard',
-    // User-focused value proposition
-    heroSubtitle: 'One Key, All AI Models',
-    heroDescription: 'No need to manage multiple subscriptions. Access Claude, GPT, Gemini and more with a single API key',
-    tags: {
-      subscriptionToApi: 'Subscription to API',
-      stickySession: 'Session Persistence',
-      realtimeBilling: 'Pay As You Go'
+    badge: 'Official API Access',
+    heroTitle: 'Official AI API Gateway',
+    heroSubtitle:
+      'Direct access to official model capabilities with a stable, native-grade API layer built for sustained high traffic.',
+    heroDescription:
+      'tokenMKT is designed for production workloads with unified auth, smart routing, realtime billing, and health-aware failover that keeps upstream capability dependable inside your system.',
+    heroSecondaryCta: 'View Documentation',
+    quickstart: {
+      label: 'Quickstart',
+      title: 'Almost no integration changes',
+      filename: 'quickstart.py',
+      comment: '# Only replace base_url, keep the rest unchanged',
+      response: 'Hello! I am the tokenMKT official API gateway.'
     },
-    // Pain points section
-    painPoints: {
-      title: 'Sound Familiar?',
-      items: {
-        expensive: {
-          title: 'High Subscription Costs',
-          desc: 'Paying for multiple AI subscriptions that add up every month'
-        },
-        complex: {
-          title: 'Account Chaos',
-          desc: 'Managing scattered accounts and API keys across different platforms'
-        },
-        unstable: {
-          title: 'Service Interruptions',
-          desc: 'Single accounts hitting rate limits and disrupting your workflow'
-        },
-        noControl: {
-          title: 'No Usage Control',
-          desc: "Can't track where your money goes or limit team member usage"
-        }
+    metrics: {
+      official: {
+        label: 'Official API',
+        value: 'Direct'
+      },
+      stability: {
+        label: 'Stable Routing',
+        value: '24/7'
+      },
+      purity: {
+        label: 'Native Fidelity',
+        value: 'Raw'
       }
     },
-    // Solutions section
-    solutions: {
-      title: 'We Solve These Problems',
-      subtitle: 'Three simple steps to stress-free AI access'
+    trust: {
+      title: 'An access layer built for high-traffic production workloads',
+      subtitle: 'Not just API availability, but dependable long-term delivery for real business traffic.'
     },
     features: {
-      unifiedGateway: 'One-Click Access',
-      unifiedGatewayDesc: 'Get a single API key to call all connected AI models. No separate applications needed.',
-      multiAccount: 'Always Reliable',
-      multiAccountDesc: 'Smart routing across multiple upstream accounts with automatic failover. Say goodbye to errors.',
-      balanceQuota: 'Pay What You Use',
-      balanceQuotaDesc: 'Usage-based billing with quota limits. Full visibility into team consumption.'
-    },
-    // Comparison section
-    comparison: {
-      title: 'Why Choose Us?',
-      headers: {
-        feature: 'Comparison',
-        official: 'Official Subscriptions',
-        us: 'Our Platform'
+      official: {
+        title: 'Official API Access',
+        desc: 'Stay aligned with upstream auth patterns, interface capability, and model evolution.'
       },
-      items: {
-        pricing: {
-          feature: 'Pricing',
-          official: 'Fixed monthly fee, pay even if unused',
-          us: 'Pay only for what you use'
-        },
-        models: {
-          feature: 'Model Selection',
-          official: 'Single provider only',
-          us: 'Switch between models freely'
-        },
-        management: {
-          feature: 'Account Management',
-          official: 'Manage each service separately',
-          us: 'Unified key, one dashboard'
-        },
-        stability: {
-          feature: 'Stability',
-          official: 'Single account rate limits',
-          us: 'Multi-account pool, auto-failover'
-        },
-        control: {
-          feature: 'Usage Control',
-          official: 'Not available',
-          us: 'Quotas & detailed analytics'
-        }
+      stability: {
+        title: 'Stable Under High Traffic',
+        desc: 'Use health-aware routing, multi-node balancing, and automatic switchover to reduce disruption.'
+      },
+      purity: {
+        title: 'Native Model Delivery Path',
+        desc: 'Minimize unnecessary middleware interference so results stay close to official output.'
       }
     },
     providers: {
       title: 'Supported AI Models',
-      description: 'One API, Multiple Choices',
+      description: 'One API connected to major official model providers',
       supported: 'Supported',
       soon: 'Soon',
       claude: 'Claude',
@@ -99,14 +67,97 @@ export default {
       antigravity: 'Antigravity',
       more: 'More'
     },
-    // CTA section
     cta: {
-      title: 'Ready to Get Started?',
-      description: 'Sign up now and get free trial credits to experience seamless AI access',
-      button: 'Sign Up Free'
+      title: 'Bring official AI capability into your product with a steadier API layer',
+      description: 'Start integrating after signup, with a setup shaped for production API traffic.',
+      button: 'Start Integration'
     },
     footer: {
       allRightsReserved: 'All rights reserved.'
+    }
+  },
+
+  installGuide: {
+    badge: 'Install & Configure',
+    title: 'Install Guide',
+    subtitle: 'Choose the setup that matches your AI CLI tool and connect to the tokenMKT official API gateway in minutes.',
+    backHome: 'Back Home',
+    overviewTitle: 'See the flow first',
+    stepPrefix: 'Step',
+    checklistTitle: 'Before You Start',
+    optionalEyebrow: 'Optional',
+    optionalTitle: 'Additional Configuration',
+    copy: 'Copy',
+    copySuccess: 'Copied to clipboard',
+    tipsEyebrow: 'Best Practice',
+    tipsTitle: 'Recommended Setup Tips',
+    labels: {
+      install: 'Install',
+      config: 'Config',
+      verify: 'Verify'
+    },
+    blockEyebrows: {
+      install: 'Install Command',
+      config: 'Config File',
+      auth: 'Auth File',
+      env: 'Environment',
+      ide: 'Editor Config',
+      verify: 'Verify Command'
+    },
+    tip1: 'Copy the complete configuration together so old local variables do not override the new gateway setup.',
+    tip2: 'If you already use an OpenAI-compatible workflow, you usually only need to replace the base URL and API key.',
+    tip3: 'After setup, run one minimal verification command before using it in real traffic.',
+    codex: {
+      summaryTitle: 'Codex CLI Setup',
+      summary: 'Best for OpenAI-compatible workflows. Add one config file and one auth file, then launch with `codex`.',
+      installValue: 'Install Codex CLI globally',
+      configValue: 'Write ~/.codex/config.toml and auth.json',
+      verifyValue: 'Run codex in terminal',
+      check1: 'Make sure Node.js 18+ is available on your machine.',
+      check2: 'Prepare your tokenMKT API key such as sk-tokenmkt-....',
+      check3: 'Back up any existing ~/.codex files before replacing them.',
+      installBlockTitle: 'Install Codex CLI',
+      installBlockDesc: 'Run a global install first if Codex CLI is not already available.',
+      configBlockTitle: 'Create the Codex config file',
+      configBlockDesc: 'Point the provider to OpenAI-compatible responses via the tokenMKT gateway.',
+      authBlockTitle: 'Create the API key file',
+      authBlockDesc: 'Store your tokenMKT key in auth.json so the CLI can load it automatically.',
+      verifyBlockTitle: 'Verify the setup',
+      verifyBlockDesc: 'If the CLI opens normally and can continue the session, the setup is working.'
+    },
+    claude: {
+      summaryTitle: 'Claude Code Setup',
+      summary: 'Best for Claude Code and VSCode Claude Code workflows. The key step is switching Anthropic environment variables to tokenMKT.',
+      installValue: 'Install Claude Code globally',
+      configValue: 'Set ANTHROPIC_BASE_URL and token',
+      verifyValue: 'Run claude in terminal',
+      check1: 'Make sure Node.js is installed and npm is available.',
+      check2: 'Prepare your tokenMKT API key and confirm the gateway domain is reachable.',
+      check3: 'If you use Claude Code in both terminal and VSCode, configure both with the same values.',
+      installBlockTitle: 'Install Claude Code',
+      installBlockDesc: 'Install the official CLI first, then point it to tokenMKT.',
+      envBlockTitle: 'Set terminal environment variables',
+      envBlockDesc: 'Base URL, auth token, and nonessential traffic control are the key values for terminal usage.',
+      ideBlockTitle: 'Configure VSCode Claude Code',
+      ideBlockDesc: 'If you use Claude Code inside VSCode, inject the same environment variables into settings.json.',
+      verifyBlockTitle: 'Verify the setup',
+      verifyBlockDesc: 'If Claude Code starts a session successfully, the connection is using tokenMKT.'
+    },
+    gemini: {
+      summaryTitle: 'Gemini CLI Setup',
+      summary: 'Best for Gemini CLI users. This flow is lightweight: install the CLI and export three environment variables.',
+      installValue: 'Install Gemini CLI globally',
+      configValue: 'Set Google Gemini base URL and key',
+      verifyValue: 'Run gemini in terminal',
+      check1: 'Make sure Node.js 18+ is available on your machine.',
+      check2: 'Prepare your tokenMKT API key and confirm network access to the tokenMKT gateway.',
+      check3: 'If older Gemini environment variables already exist locally, clear them before applying the new setup.',
+      installBlockTitle: 'Install Gemini CLI',
+      installBlockDesc: 'Install the CLI first, then route it through the tokenMKT Gemini gateway endpoint.',
+      envBlockTitle: 'Set Gemini environment variables',
+      envBlockDesc: 'Set the base URL, API key, and default model so the CLI uses tokenMKT.',
+      verifyBlockTitle: 'Verify the setup',
+      verifyBlockDesc: 'If Gemini CLI opens a normal command session, the setup is complete.'
     }
   },
 
