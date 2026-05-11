@@ -52,7 +52,7 @@ tokenMKT は、AI 製品のサブスクリプションから API クォータを
 
 <table>
 <tr>
-<td width="180" align="center" valign="middle"><a href="https://tokenmkt.cc/"><img src="assets/partners/logos/tokenmkt_icon.png" alt="tokenMKT" width="150"></a></td>
+<td width="180" align="center" valign="middle"><a href="https://tokenmkt.cc/"><img src="frontend/public/logo.png" alt="tokenMKT" width="150"></a></td>
 <td valign="middle"><b><a href="https://tokenmkt.cc/">tokenMKT</a></b> はこのデプロイの公式リレーサービスで、Claude Code、Codex、Gemini などの人気モデルへの安定したアクセスを提供します。</td>
 </tr>
 <tr>

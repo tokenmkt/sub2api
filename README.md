@@ -52,7 +52,7 @@ tokenMKT is an AI API gateway platform designed to distribute and manage API quo
 
 <table>
 <tr>
-<td width="180" align="center" valign="middle"><a href="https://tokenmkt.cc/"><img src="assets/partners/logos/tokenmkt_icon.png" alt="tokenMKT" width="150"></a></td>
+<td width="180" align="center" valign="middle"><a href="https://tokenmkt.cc/"><img src="frontend/public/logo.png" alt="tokenMKT" width="150"></a></td>
 <td valign="middle"><b><a href="https://tokenmkt.cc/">tokenMKT</a></b> is the official relay service for this deployment, offering stable access to Claude Code, Codex, Gemini and other popular models.</td>
 </tr>
 
