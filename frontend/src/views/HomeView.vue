@@ -358,9 +358,6 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore, useAppStore } from '@/stores'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import Icon from '@/components/icons/Icon.vue'
-import chatgptLogo from '../../../assets/partners/logos/ChatGPT.png'
-import claudeLogo from '../../../assets/partners/logos/Claude.png'
-import geminiLogo from '../../../assets/partners/logos/Gemini.jpg'
 
 const { t } = useI18n()
 
@@ -389,6 +386,9 @@ const userInitial = computed(() => {
 })
 
 const currentYear = computed(() => new Date().getFullYear())
+const chatgptLogo = '/ChatGPT.png'
+const claudeLogo = '/Claude.png'
+const geminiLogo = '/Gemini.jpg'
 
 const heroMetrics = computed(() => [
   { label: t('home.metrics.official.label'), value: t('home.metrics.official.value') },
