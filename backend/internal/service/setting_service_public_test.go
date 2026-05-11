@@ -63,6 +63,15 @@ func TestSettingService_GetPublicSettings_ExposesRegistrationEmailSuffixWhitelis
 	require.Equal(t, []string{"@example.com", "@foo.bar"}, settings.RegistrationEmailSuffixWhitelist)
 }
 
+func TestSettingService_GetPublicSettings_UsestokenMKTBrandDefaults(t *testing.T) {
+	svc := NewSettingService(&settingPublicRepoStub{values: map[string]string{}}, &config.Config{})
+
+	settings, err := svc.GetPublicSettings(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, "tokenMKT", settings.SiteName)
+	require.Equal(t, "Subscription to API Conversion Platform", settings.SiteSubtitle)
+}
+
 func TestSettingService_GetPublicSettings_ExposesTablePreferences(t *testing.T) {
 	repo := &settingPublicRepoStub{
 		values: map[string]string{
