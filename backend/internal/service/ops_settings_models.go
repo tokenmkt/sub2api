@@ -3,8 +3,9 @@ package service
 // Ops settings models stored in DB `settings` table (JSON blobs).
 
 type OpsEmailNotificationConfig struct {
-	Alert  OpsEmailAlertConfig  `json:"alert"`
-	Report OpsEmailReportConfig `json:"report"`
+	Alert  OpsEmailAlertConfig         `json:"alert"`
+	Report OpsEmailReportConfig        `json:"report"`
+	Feishu OpsFeishuNotificationConfig `json:"feishu"`
 }
 
 type OpsEmailAlertConfig struct {
@@ -31,11 +32,21 @@ type OpsEmailReportConfig struct {
 	AccountHealthErrorRateThreshold float64  `json:"account_health_error_rate_threshold"`
 }
 
+type OpsFeishuNotificationConfig struct {
+	Alert OpsFeishuAlertConfig `json:"alert"`
+}
+
+type OpsFeishuAlertConfig struct {
+	Enabled     bool     `json:"enabled"`
+	WebhookURLs []string `json:"webhook_urls"`
+}
+
 // OpsEmailNotificationConfigUpdateRequest allows partial updates, while the
 // frontend can still send the full config shape.
 type OpsEmailNotificationConfigUpdateRequest struct {
-	Alert  *OpsEmailAlertConfig  `json:"alert"`
-	Report *OpsEmailReportConfig `json:"report"`
+	Alert  *OpsEmailAlertConfig         `json:"alert"`
+	Report *OpsEmailReportConfig        `json:"report"`
+	Feishu *OpsFeishuNotificationConfig `json:"feishu"`
 }
 
 type OpsDistributedLockSettings struct {
