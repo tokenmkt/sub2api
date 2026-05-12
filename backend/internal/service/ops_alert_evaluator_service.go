@@ -643,7 +643,7 @@ func buildOpsAlertDescription(rule *OpsAlertRule, value float64, windowMinutes i
 }
 
 func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runtimeCfg *OpsAlertRuntimeSettings, rule *OpsAlertRule, event *OpsAlertEvent) bool {
-	if s == nil || s.emailService == nil || s.opsService == nil || event == nil || rule == nil {
+	if s == nil || s.opsService == nil || event == nil || rule == nil {
 		return false
 	}
 	if event.EmailSent {
@@ -654,13 +654,10 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 	}
 
 	emailCfg, err := s.opsService.GetEmailNotificationConfig(ctx)
-	if err != nil || emailCfg == nil || !emailCfg.Alert.Enabled {
+	if err != nil || emailCfg == nil {
 		return false
 	}
 
-	if len(emailCfg.Alert.Recipients) == 0 {
-		return false
-	}
 	if !shouldSendOpsAlertEmailByMinSeverity(strings.TrimSpace(emailCfg.Alert.MinSeverity), strings.TrimSpace(rule.Severity)) {
 		return false
 	}
@@ -678,25 +675,71 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 	body := buildOpsAlertEmailBody(rule, event)
 
 	anySent := false
-	for _, to := range emailCfg.Alert.Recipients {
-		addr := strings.TrimSpace(to)
-		if addr == "" {
-			continue
+	if emailCfg.Alert.Enabled && s.emailService != nil && len(emailCfg.Alert.Recipients) > 0 {
+		for _, to := range emailCfg.Alert.Recipients {
+			addr := strings.TrimSpace(to)
+			if addr == "" {
+				continue
+			}
+			if !s.emailLimiter.Allow(time.Now().UTC()) {
+				continue
+			}
+			if err := s.emailService.SendEmail(ctx, addr, subject, body); err != nil {
+				// Ignore per-recipient failures; continue best-effort.
+				continue
+			}
+			anySent = true
 		}
-		if !s.emailLimiter.Allow(time.Now().UTC()) {
-			continue
+	}
+
+	if emailCfg.Feishu.Alert.Enabled {
+		text := buildOpsAlertFeishuText(rule, event)
+		for _, webhookURL := range emailCfg.Feishu.Alert.WebhookURLs {
+			webhookURL = strings.TrimSpace(webhookURL)
+			if webhookURL == "" {
+				continue
+			}
+			if !s.emailLimiter.Allow(time.Now().UTC()) {
+				continue
+			}
+			if err := sendFeishuWebhookNotification(ctx, webhookURL, subject, text); err != nil {
+				// Ignore per-webhook failures; continue best-effort.
+				continue
+			}
+			anySent = true
 		}
-		if err := s.emailService.SendEmail(ctx, addr, subject, body); err != nil {
-			// Ignore per-recipient failures; continue best-effort.
-			continue
-		}
-		anySent = true
 	}
 
 	if anySent {
 		_ = s.opsRepo.UpdateAlertEventEmailSent(context.Background(), event.ID, true)
 	}
 	return anySent
+}
+
+func buildOpsAlertFeishuText(rule *OpsAlertRule, event *OpsAlertEvent) string {
+	if rule == nil || event == nil {
+		return ""
+	}
+	metric := strings.TrimSpace(rule.MetricType)
+	value := "-"
+	threshold := fmt.Sprintf("%.2f", rule.Threshold)
+	if event.MetricValue != nil {
+		value = fmt.Sprintf("%.2f", *event.MetricValue)
+	}
+	if event.ThresholdValue != nil {
+		threshold = fmt.Sprintf("%.2f", *event.ThresholdValue)
+	}
+	return fmt.Sprintf("Rule: %s\nSeverity: %s\nStatus: %s\nMetric: %s %s %s (threshold %s)\nFired at: %s\nDescription: %s",
+		strings.TrimSpace(rule.Name),
+		strings.TrimSpace(rule.Severity),
+		strings.TrimSpace(event.Status),
+		metric,
+		strings.TrimSpace(rule.Operator),
+		value,
+		threshold,
+		event.FiredAt.Format(time.RFC3339),
+		strings.TrimSpace(event.Description),
+	)
 }
 
 func buildOpsAlertEmailBody(rule *OpsAlertRule, event *OpsAlertEvent) string {

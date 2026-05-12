@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -92,6 +93,13 @@ func (s *OpsService) UpdateEmailNotificationConfig(ctx context.Context, req *Ops
 		cfg.Report.AccountHealthErrorRateThreshold = req.Report.AccountHealthErrorRateThreshold
 	}
 
+	if req.Feishu != nil {
+		cfg.Feishu.Alert.Enabled = req.Feishu.Alert.Enabled
+		if req.Feishu.Alert.WebhookURLs != nil {
+			cfg.Feishu.Alert.WebhookURLs = req.Feishu.Alert.WebhookURLs
+		}
+	}
+
 	if err := validateOpsEmailNotificationConfig(cfg); err != nil {
 		return nil, err
 	}
@@ -131,6 +139,12 @@ func defaultOpsEmailNotificationConfig() *OpsEmailNotificationConfig {
 			AccountHealthSchedule:           "0 9 * * *",
 			AccountHealthErrorRateThreshold: 10.0,
 		},
+		Feishu: OpsFeishuNotificationConfig{
+			Alert: OpsFeishuAlertConfig{
+				Enabled:     false,
+				WebhookURLs: []string{},
+			},
+		},
 	}
 }
 
@@ -144,8 +158,12 @@ func normalizeOpsEmailNotificationConfig(cfg *OpsEmailNotificationConfig) {
 	if cfg.Report.Recipients == nil {
 		cfg.Report.Recipients = []string{}
 	}
+	if cfg.Feishu.Alert.WebhookURLs == nil {
+		cfg.Feishu.Alert.WebhookURLs = []string{}
+	}
 
 	cfg.Alert.MinSeverity = strings.TrimSpace(cfg.Alert.MinSeverity)
+	cfg.Feishu.Alert.WebhookURLs = normalizeWebhookURLs(cfg.Feishu.Alert.WebhookURLs)
 	cfg.Report.DailySummarySchedule = strings.TrimSpace(cfg.Report.DailySummarySchedule)
 	cfg.Report.WeeklySummarySchedule = strings.TrimSpace(cfg.Report.WeeklySummarySchedule)
 	cfg.Report.ErrorDigestSchedule = strings.TrimSpace(cfg.Report.ErrorDigestSchedule)
@@ -188,6 +206,45 @@ func validateOpsEmailNotificationConfig(cfg *OpsEmailNotificationConfig) error {
 	}
 	if cfg.Report.AccountHealthErrorRateThreshold < 0 || cfg.Report.AccountHealthErrorRateThreshold > 100 {
 		return errors.New("report.account_health_error_rate_threshold must be between 0 and 100")
+	}
+	for _, rawURL := range cfg.Feishu.Alert.WebhookURLs {
+		if err := validateHTTPWebhookURL(rawURL); err != nil {
+			return errors.New("feishu.alert.webhook_urls contains invalid URL")
+		}
+	}
+	return nil
+}
+
+func normalizeWebhookURLs(values []string) []string {
+	if len(values) == 0 {
+		return []string{}
+	}
+	out := make([]string, 0, len(values))
+	seen := map[string]struct{}{}
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		if _, ok := seen[trimmed]; ok {
+			continue
+		}
+		seen[trimmed] = struct{}{}
+		out = append(out, trimmed)
+	}
+	return out
+}
+
+func validateHTTPWebhookURL(rawURL string) error {
+	parsed, err := url.Parse(strings.TrimSpace(rawURL))
+	if err != nil {
+		return err
+	}
+	if parsed.Scheme != "https" && parsed.Scheme != "http" {
+		return errors.New("webhook URL scheme must be http or https")
+	}
+	if parsed.Host == "" {
+		return errors.New("webhook URL host is required")
 	}
 	return nil
 }
