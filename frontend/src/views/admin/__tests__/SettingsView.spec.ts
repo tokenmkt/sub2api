@@ -22,6 +22,8 @@ const {
   updateProvider,
   createProvider,
   deleteProvider,
+  getEmailNotificationConfig,
+  updateEmailNotificationConfig,
   fetchPublicSettings,
   adminSettingsFetch,
   showError,
@@ -44,6 +46,8 @@ const {
   updateProvider: vi.fn(),
   createProvider: vi.fn(),
   deleteProvider: vi.fn(),
+  getEmailNotificationConfig: vi.fn(),
+  updateEmailNotificationConfig: vi.fn(),
   fetchPublicSettings: vi.fn(),
   adminSettingsFetch: vi.fn(),
   showError: vi.fn(),
@@ -90,6 +94,17 @@ vi.mock("@/stores", () => ({
     showInfo: vi.fn(),
     fetchPublicSettings,
   }),
+}));
+
+vi.mock("@/api/admin/ops", () => ({
+  opsAPI: {
+    getEmailNotificationConfig,
+    updateEmailNotificationConfig,
+  },
+  default: {
+    getEmailNotificationConfig,
+    updateEmailNotificationConfig,
+  },
 }));
 
 vi.mock("@/stores/adminSettings", () => ({
@@ -159,6 +174,22 @@ vi.mock("vue-i18n", async () => {
     "admin.settings.paymentVisibleMethods.sourceRequiredError": "{title} 已启用，请先选择支付来源。",
     "admin.settings.payment.configGuide": "查看支付配置说明",
     "admin.settings.payment.findProvider": "查看支持的支付方式",
+    "admin.settings.tabs.notifications": "通知设置",
+    "admin.settings.notifications.title": "通知渠道设置",
+    "admin.settings.notifications.description": "配置系统通知渠道，不影响现有邮件配置。",
+    "admin.settings.notifications.feishuTitle": "飞书告警",
+    "admin.settings.notifications.feishuDescription": "告警触发时通过飞书自定义机器人发送通知。",
+    "admin.settings.notifications.feishuEnabled": "启用飞书告警",
+    "admin.settings.notifications.webhooks": "飞书 Webhook",
+    "admin.settings.notifications.webhookPlaceholder": "输入飞书机器人 Webhook URL",
+    "admin.settings.notifications.webhookHint": "保存后，告警触发时会发送到已配置的飞书机器人。",
+    "admin.settings.notifications.addWebhook": "添加 Webhook",
+    "admin.settings.notifications.save": "保存通知设置",
+    "admin.settings.notifications.saved": "通知设置已保存",
+    "admin.settings.notifications.loadFailed": "加载通知设置失败",
+    "admin.settings.notifications.saveFailed": "保存通知设置失败",
+    "admin.settings.notifications.webhooksRequired": "启用飞书告警前请先添加 Webhook",
+    "admin.settings.notifications.invalidWebhook": "请输入有效的 http(s) Webhook URL",
     "admin.settings.openaiExperimentalScheduler.title": "OpenAI 实验调度策略",
     "admin.settings.openaiExperimentalScheduler.description": "默认关闭。开启后仅影响本网关在 OpenAI 账号间的实验性调度选择逻辑，不代表上游 OpenAI 官方能力。",
     "admin.settings.site.uploadImage": "上传图片",
@@ -401,6 +432,37 @@ const baseSettingsResponse = {
   account_quota_notify_emails: [],
 };
 
+const baseEmailNotificationConfig = {
+  alert: {
+    enabled: true,
+    recipients: ["ops@example.com"],
+    min_severity: "warning",
+    rate_limit_per_hour: 3,
+    batching_window_seconds: 60,
+    include_resolved_alerts: true,
+  },
+  report: {
+    enabled: true,
+    recipients: ["report@example.com"],
+    daily_summary_enabled: true,
+    daily_summary_schedule: "0 9 * * *",
+    weekly_summary_enabled: false,
+    weekly_summary_schedule: "0 9 * * 1",
+    error_digest_enabled: true,
+    error_digest_schedule: "*/15 * * * *",
+    error_digest_min_count: 5,
+    account_health_enabled: true,
+    account_health_schedule: "0 8 * * *",
+    account_health_error_rate_threshold: 10,
+  },
+  feishu: {
+    alert: {
+      enabled: false,
+      webhook_urls: [],
+    },
+  },
+};
+
 function mountView() {
   return mount(SettingsView, {
     global: {
@@ -452,7 +514,17 @@ async function openUsersTab(wrapper: ReturnType<typeof mountView>) {
   await flushPromises();
 }
 
-describe("admin SettingsView payment visible method controls", () => {
+async function openNotificationsTab(wrapper: ReturnType<typeof mountView>) {
+  const notificationsTabButton = wrapper
+    .findAll("button")
+    .find((node) => node.text().includes("通知设置"));
+
+  expect(notificationsTabButton).toBeDefined();
+  await notificationsTabButton?.trigger("click");
+  await flushPromises();
+}
+
+describe("admin SettingsView notification settings", () => {
   beforeEach(() => {
     getSettings.mockReset();
     updateSettings.mockReset();
@@ -471,6 +543,8 @@ describe("admin SettingsView payment visible method controls", () => {
     updateProvider.mockReset();
     createProvider.mockReset();
     deleteProvider.mockReset();
+    getEmailNotificationConfig.mockReset();
+    updateEmailNotificationConfig.mockReset();
     fetchPublicSettings.mockReset();
     adminSettingsFetch.mockReset();
     showError.mockReset();
@@ -527,6 +601,132 @@ describe("admin SettingsView payment visible method controls", () => {
     getProviders.mockResolvedValue({
       data: [],
     });
+    getEmailNotificationConfig.mockResolvedValue({
+      ...baseEmailNotificationConfig,
+      alert: { ...baseEmailNotificationConfig.alert },
+      report: { ...baseEmailNotificationConfig.report },
+      feishu: {
+        alert: { ...baseEmailNotificationConfig.feishu.alert },
+      },
+    });
+    updateEmailNotificationConfig.mockImplementation(async (payload) => payload);
+    fetchPublicSettings.mockResolvedValue(undefined);
+    adminSettingsFetch.mockResolvedValue(undefined);
+  });
+
+  it("configures Feishu alerts in a separate notification tab without changing email settings", async () => {
+    const wrapper = mountView();
+
+    await flushPromises();
+    await openNotificationsTab(wrapper);
+
+    const notificationPanel = wrapper.get('[data-testid="notification-settings-panel"]');
+    expect(notificationPanel.text()).toContain("通知渠道设置");
+    expect(notificationPanel.text()).toContain("飞书告警");
+    expect(notificationPanel.text()).not.toContain("SMTP");
+    expect(notificationPanel.text()).not.toContain("测试邮件");
+
+    await wrapper.get('[data-testid="feishu-alert-enabled"]').setValue(true);
+    await wrapper
+      .get('[data-testid="feishu-webhook-input"]')
+      .setValue("https://open.feishu.cn/open-apis/bot/v2/hook/test-token");
+    await wrapper.get('[data-testid="feishu-add-webhook"]').trigger("click");
+    await wrapper.get('[data-testid="save-notification-settings"]').trigger("click");
+    await flushPromises();
+
+    expect(updateEmailNotificationConfig).toHaveBeenCalledTimes(1);
+    expect(updateEmailNotificationConfig).toHaveBeenCalledWith({
+      ...baseEmailNotificationConfig,
+      feishu: {
+        alert: {
+          enabled: true,
+          webhook_urls: [
+            "https://open.feishu.cn/open-apis/bot/v2/hook/test-token",
+          ],
+        },
+      },
+    });
+  });
+});
+
+describe("admin SettingsView payment visible method controls", () => {
+  beforeEach(() => {
+    getSettings.mockReset();
+    updateSettings.mockReset();
+    getWebSearchEmulationConfig.mockReset();
+    updateWebSearchEmulationConfig.mockReset();
+    getAdminApiKey.mockReset();
+    getOverloadCooldownSettings.mockReset();
+    getRateLimit429CooldownSettings.mockReset();
+    updateRateLimit429CooldownSettings.mockReset();
+    getStreamTimeoutSettings.mockReset();
+    getRectifierSettings.mockReset();
+    getBetaPolicySettings.mockReset();
+    getGroups.mockReset();
+    listProxies.mockReset();
+    getProviders.mockReset();
+    updateProvider.mockReset();
+    createProvider.mockReset();
+    deleteProvider.mockReset();
+    getEmailNotificationConfig.mockReset();
+    updateEmailNotificationConfig.mockReset();
+    fetchPublicSettings.mockReset();
+    adminSettingsFetch.mockReset();
+    showError.mockReset();
+    showSuccess.mockReset();
+    localeRef.value = "zh-CN";
+
+    getSettings.mockResolvedValue({ ...baseSettingsResponse });
+    updateSettings.mockImplementation(async (payload) => ({
+      ...baseSettingsResponse,
+      ...payload,
+    }));
+    getWebSearchEmulationConfig.mockResolvedValue({
+      enabled: false,
+      providers: [],
+    });
+    updateWebSearchEmulationConfig.mockResolvedValue({
+      enabled: false,
+      providers: [],
+    });
+    getAdminApiKey.mockResolvedValue({
+      exists: false,
+      masked_key: "",
+    });
+    getOverloadCooldownSettings.mockResolvedValue({
+      enabled: true,
+      cooldown_minutes: 10,
+    });
+    getRateLimit429CooldownSettings.mockResolvedValue({
+      enabled: true,
+      cooldown_seconds: 5,
+    });
+    updateRateLimit429CooldownSettings.mockImplementation(async (payload) => payload);
+    getStreamTimeoutSettings.mockResolvedValue({
+      enabled: true,
+      action: "temp_unsched",
+      temp_unsched_minutes: 5,
+      threshold_count: 3,
+      threshold_window_minutes: 10,
+    });
+    getRectifierSettings.mockResolvedValue({
+      enabled: true,
+      thinking_signature_enabled: true,
+      thinking_budget_enabled: true,
+      apikey_signature_enabled: false,
+      apikey_signature_patterns: [],
+    });
+    getBetaPolicySettings.mockResolvedValue({
+      rules: [],
+    });
+    getGroups.mockResolvedValue([]);
+    listProxies.mockResolvedValue({
+      items: [],
+    });
+    getProviders.mockResolvedValue({
+      data: [],
+    });
+    getEmailNotificationConfig.mockResolvedValue(baseEmailNotificationConfig);
     fetchPublicSettings.mockResolvedValue(undefined);
     adminSettingsFetch.mockResolvedValue(undefined);
   });
@@ -714,6 +914,8 @@ describe("admin SettingsView wechat connect controls", () => {
     updateProvider.mockReset();
     createProvider.mockReset();
     deleteProvider.mockReset();
+    getEmailNotificationConfig.mockReset();
+    updateEmailNotificationConfig.mockReset();
     fetchPublicSettings.mockReset();
     adminSettingsFetch.mockReset();
     showError.mockReset();
@@ -773,6 +975,7 @@ describe("admin SettingsView wechat connect controls", () => {
     getProviders.mockResolvedValue({
       data: [],
     });
+    getEmailNotificationConfig.mockResolvedValue(baseEmailNotificationConfig);
     fetchPublicSettings.mockResolvedValue(undefined);
     adminSettingsFetch.mockResolvedValue(undefined);
   });

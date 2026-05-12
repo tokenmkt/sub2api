@@ -802,6 +802,12 @@ export interface EmailNotificationConfig {
     account_health_schedule: string
     account_health_error_rate_threshold: number
   }
+  feishu: {
+    alert: {
+      enabled: boolean
+      webhook_urls: string[]
+    }
+  }
 }
 
 export interface OpsMetricThresholds {

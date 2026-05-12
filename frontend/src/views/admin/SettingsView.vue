@@ -5127,6 +5127,145 @@
           />
         </div>
 
+        <div
+          v-show="activeTab === 'notifications'"
+          data-testid="notification-settings-panel"
+          class="space-y-6"
+        >
+          <div class="card">
+            <div
+              class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-dark-700"
+            >
+              <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ t("admin.settings.notifications.title") }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  {{ t("admin.settings.notifications.description") }}
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-6 p-6">
+              <div
+                v-if="notificationLoading"
+                class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"
+              >
+                <div
+                  class="h-4 w-4 animate-spin rounded-full border-b-2 border-primary-600"
+                ></div>
+                {{ t("common.loading") }}
+              </div>
+
+              <div
+                v-else-if="notificationConfig"
+                class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-dark-700 dark:bg-dark-800/60"
+              >
+                <div class="mb-4 flex items-start justify-between gap-4">
+                  <div>
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+                      {{ t("admin.settings.notifications.feishuTitle") }}
+                    </h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      {{ t("admin.settings.notifications.feishuDescription") }}
+                    </p>
+                  </div>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <input
+                      v-model="notificationConfig.feishu.alert.enabled"
+                      data-testid="feishu-alert-enabled"
+                      type="checkbox"
+                      class="h-4 w-4 rounded border-gray-300"
+                    />
+                    <span>{{ t("admin.settings.notifications.feishuEnabled") }}</span>
+                  </label>
+                </div>
+
+                <div>
+                  <label class="input-label">
+                    {{ t("admin.settings.notifications.webhooks") }}
+                  </label>
+                  <div class="mt-1 flex gap-2">
+                    <input
+                      v-model="feishuWebhookInput"
+                      data-testid="feishu-webhook-input"
+                      type="url"
+                      class="input"
+                      :placeholder="t('admin.settings.notifications.webhookPlaceholder')"
+                      @keydown.enter.prevent="addFeishuWebhook"
+                    />
+                    <button
+                      type="button"
+                      data-testid="feishu-add-webhook"
+                      class="btn btn-secondary whitespace-nowrap"
+                      @click="addFeishuWebhook"
+                    >
+                      {{ t("admin.settings.notifications.addWebhook") }}
+                    </button>
+                  </div>
+                  <p
+                    v-if="feishuWebhookError"
+                    class="mt-1 text-xs text-red-600 dark:text-red-400"
+                  >
+                    {{ feishuWebhookError }}
+                  </p>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <span
+                      v-for="url in notificationConfig.feishu.alert.webhook_urls"
+                      :key="url"
+                      class="inline-flex max-w-full items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                    >
+                      <span class="max-w-[28rem] truncate">{{ url }}</span>
+                      <button
+                        type="button"
+                        class="text-emerald-700/80 hover:text-emerald-900 dark:text-emerald-300"
+                        @click="removeFeishuWebhook(url)"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  </div>
+                  <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    {{ t("admin.settings.notifications.webhookHint") }}
+                  </p>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                  <button
+                    type="button"
+                    data-testid="save-notification-settings"
+                    class="btn btn-primary"
+                    :disabled="notificationSaving"
+                    @click="saveNotificationSettings"
+                  >
+                    <svg
+                      v-if="notificationSaving"
+                      class="h-4 w-4 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    {{ t("admin.settings.notifications.save") }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div v-show="activeTab === 'email'" class="space-y-6">
           <!-- Email disabled hint - show when email_verify_enabled is off -->
           <div v-if="!form.email_verify_enabled" class="card">
@@ -5522,7 +5661,7 @@
         </div>
 
         <!-- Save Button -->
-        <div v-show="activeTab !== 'backup'" class="flex justify-end">
+        <div v-show="activeTab !== 'backup' && activeTab !== 'notifications'" class="flex justify-end">
           <button
             type="submit"
             :disabled="saving || loadFailed"
@@ -5632,6 +5771,8 @@ import ImageUpload from "@/components/common/ImageUpload.vue";
 import BackupSettings from "@/views/admin/BackupView.vue";
 import { useClipboard } from "@/composables/useClipboard";
 import { affiliatesAPI, type AffiliateAdminEntry, type SimpleUser as AffiliateSimpleUser } from "@/api/admin/affiliates";
+import { opsAPI } from "@/api/admin/ops";
+import type { EmailNotificationConfig } from "@/api/admin/ops";
 import { extractApiErrorMessage, extractI18nErrorMessage } from "@/utils/apiError";
 import { useAppStore } from "@/stores";
 import { useAdminSettingsStore } from "@/stores/adminSettings";
@@ -5670,6 +5811,7 @@ type SettingsTab =
   | "users"
   | "gateway"
   | "payment"
+  | "notifications"
   | "email"
   | "backup";
 const activeTab = ref<SettingsTab>("general");
@@ -5680,6 +5822,7 @@ const settingsTabs = [
   { key: "users" as SettingsTab, icon: "user" as const },
   { key: "gateway" as SettingsTab, icon: "server" as const },
   { key: "payment" as SettingsTab, icon: "creditCard" as const },
+  { key: "notifications" as SettingsTab, icon: "bell" as const },
   { key: "email" as SettingsTab, icon: "mail" as const },
   { key: "backup" as SettingsTab, icon: "database" as const },
 ];
@@ -5690,6 +5833,11 @@ const loadFailed = ref(false);
 const saving = ref(false);
 const testingSmtp = ref(false);
 const sendingTestEmail = ref(false);
+const notificationConfig = ref<EmailNotificationConfig | null>(null);
+const notificationLoading = ref(false);
+const notificationSaving = ref(false);
+const feishuWebhookInput = ref("");
+const feishuWebhookError = ref("");
 const smtpPasswordManuallyEdited = ref(false);
 const testEmailAddress = ref("");
 const registrationEmailSuffixWhitelistTags = ref<string[]>([]);
@@ -7073,6 +7221,122 @@ async function sendTestEmail() {
   }
 }
 
+function ensureFeishuAlertConfig(config: EmailNotificationConfig): EmailNotificationConfig {
+  if (!config.feishu) {
+    config.feishu = { alert: { enabled: false, webhook_urls: [] } };
+  }
+  if (!config.feishu.alert) {
+    config.feishu.alert = { enabled: false, webhook_urls: [] };
+  }
+  if (!Array.isArray(config.feishu.alert.webhook_urls)) {
+    config.feishu.alert.webhook_urls = [];
+  }
+  return config;
+}
+
+async function loadNotificationSettings() {
+  notificationLoading.value = true;
+  feishuWebhookError.value = "";
+  try {
+    notificationConfig.value = ensureFeishuAlertConfig(
+      await opsAPI.getEmailNotificationConfig(),
+    );
+  } catch (error: unknown) {
+    appStore.showError(
+      extractApiErrorMessage(
+        error,
+        t("admin.settings.notifications.loadFailed"),
+      ),
+    );
+  } finally {
+    notificationLoading.value = false;
+  }
+}
+
+function isValidWebhookUrl(value: string): boolean {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function addFeishuWebhook() {
+  if (!notificationConfig.value) return;
+  const raw = feishuWebhookInput.value.trim();
+  if (!raw) return;
+
+  if (!isValidWebhookUrl(raw)) {
+    feishuWebhookError.value = t("admin.settings.notifications.invalidWebhook");
+    return;
+  }
+
+  const list = notificationConfig.value.feishu.alert.webhook_urls;
+  if (!list.includes(raw)) {
+    list.push(raw);
+  }
+  feishuWebhookInput.value = "";
+  feishuWebhookError.value = "";
+}
+
+function removeFeishuWebhook(url: string) {
+  if (!notificationConfig.value) return;
+  const list = notificationConfig.value.feishu.alert.webhook_urls;
+  const idx = list.indexOf(url);
+  if (idx >= 0) {
+    list.splice(idx, 1);
+  }
+}
+
+async function saveNotificationSettings() {
+  if (!notificationConfig.value) return;
+  const config = ensureFeishuAlertConfig(notificationConfig.value);
+  const webhooks = config.feishu.alert.webhook_urls
+    .map((url) => url.trim())
+    .filter(Boolean);
+
+  if (config.feishu.alert.enabled && webhooks.length === 0) {
+    feishuWebhookError.value = t("admin.settings.notifications.webhooksRequired");
+    appStore.showError(feishuWebhookError.value);
+    return;
+  }
+
+  if (webhooks.some((url) => !isValidWebhookUrl(url))) {
+    feishuWebhookError.value = t("admin.settings.notifications.invalidWebhook");
+    appStore.showError(feishuWebhookError.value);
+    return;
+  }
+
+  notificationSaving.value = true;
+  feishuWebhookError.value = "";
+  try {
+    notificationConfig.value = ensureFeishuAlertConfig(
+      await opsAPI.updateEmailNotificationConfig({
+        ...config,
+        alert: { ...config.alert },
+        report: { ...config.report },
+        feishu: {
+          alert: {
+            enabled: config.feishu.alert.enabled,
+            webhook_urls: Array.from(new Set(webhooks)),
+          },
+        },
+      }),
+    );
+    appStore.showSuccess(t("admin.settings.notifications.saved"));
+  } catch (error: unknown) {
+    appStore.showError(
+      extractApiErrorMessage(
+        error,
+        t("admin.settings.notifications.saveFailed"),
+      ),
+    );
+  } finally {
+    notificationSaving.value = false;
+  }
+}
+
 // Admin API Key 方法
 async function loadAdminApiKey() {
   adminApiKeyLoading.value = true;
@@ -8173,6 +8437,12 @@ watch(
     }
   },
 );
+
+watch(activeTab, (tab) => {
+  if (tab === "notifications" && !notificationConfig.value && !notificationLoading.value) {
+    loadNotificationSettings();
+  }
+});
 </script>
 
 <style scoped>
