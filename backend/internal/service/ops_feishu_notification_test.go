@@ -63,7 +63,7 @@ func TestUpdateEmailNotificationConfig_PersistsFeishuWebhook(t *testing.T) {
 	}
 }
 
-func TestSendFeishuWebhookNotification_PostsTextPayload(t *testing.T) {
+func TestSendFeishuWebhookNotification_PostsInteractiveCardPayload(t *testing.T) {
 	var gotContentType string
 	var gotPayload map[string]any
 	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
@@ -87,23 +87,33 @@ func TestSendFeishuWebhookNotification_PostsTextPayload(t *testing.T) {
 		feishuWebhookHTTPClient = oldClient
 	}()
 
-	err := sendFeishuWebhookNotification(context.Background(), "https://open.feishu.cn/open-apis/bot/v2/hook/test", "Ops Alert", "service unavailable")
+	err := sendFeishuWebhookNotification(context.Background(), "https://open.feishu.cn/open-apis/bot/v2/hook/test", "Ops Alert", "service unavailable", &OpsFeishuAlertCardContext{
+		EventID: 10,
+		RuleID:  1,
+		Token:   "card-action-token",
+	})
 	if err != nil {
 		t.Fatalf("sendFeishuWebhookNotification() error = %v", err)
 	}
 	if !strings.HasPrefix(gotContentType, "application/json") {
 		t.Fatalf("Content-Type = %q, want application/json", gotContentType)
 	}
-	if gotPayload["msg_type"] != "text" {
-		t.Fatalf("msg_type = %#v, want text", gotPayload["msg_type"])
+	if gotPayload["msg_type"] != "interactive" {
+		t.Fatalf("msg_type = %#v, want interactive", gotPayload["msg_type"])
 	}
-	content, ok := gotPayload["content"].(map[string]any)
+	card, ok := gotPayload["card"].(map[string]any)
 	if !ok {
-		t.Fatalf("content = %#v, want object", gotPayload["content"])
+		t.Fatalf("card = %#v, want object", gotPayload["card"])
 	}
-	text, _ := content["text"].(string)
-	if !strings.Contains(text, "Ops Alert") || !strings.Contains(text, "service unavailable") {
-		t.Fatalf("text payload = %q", text)
+	rawCard, err := json.Marshal(card)
+	if err != nil {
+		t.Fatalf("marshal card: %v", err)
+	}
+	cardText := string(rawCard)
+	for _, want := range []string{"Ops Alert", "service unavailable", "resolve_alert", "card-action-token", `"event_id":10`} {
+		if !strings.Contains(cardText, want) {
+			t.Fatalf("card payload missing %q: %s", want, cardText)
+		}
 	}
 }
 
@@ -129,6 +139,7 @@ func TestMaybeSendAlertEmail_SendsFeishuWebhookWhenConfigured(t *testing.T) {
 	cfg.Alert.Enabled = false
 	cfg.Feishu.Alert.Enabled = true
 	cfg.Feishu.Alert.WebhookURLs = []string{"https://open.feishu.cn/open-apis/bot/v2/hook/test"}
+	cfg.Feishu.Alert.ActionToken = "card-action-token"
 	raw, err := json.Marshal(cfg)
 	if err != nil {
 		t.Fatalf("marshal config: %v", err)
@@ -146,6 +157,47 @@ func TestMaybeSendAlertEmail_SendsFeishuWebhookWhenConfigured(t *testing.T) {
 	}
 	if webhookCalls != 1 {
 		t.Fatalf("webhook calls = %d, want 1", webhookCalls)
+	}
+}
+
+func TestHandleFeishuAlertCardAction_ManualResolvesEvent(t *testing.T) {
+	repo := newRuntimeSettingRepoStub()
+	cfg := defaultOpsEmailNotificationConfig()
+	cfg.Feishu.Alert.ActionToken = "card-action-token"
+	raw, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatalf("marshal config: %v", err)
+	}
+	repo.values[SettingKeyOpsEmailNotificationConfig] = string(raw)
+
+	var gotEventID int64
+	var gotStatus string
+	var gotResolvedAt bool
+	opsSvc := &OpsService{
+		settingRepo: repo,
+		opsRepo: &opsRepoMock{
+			UpdateAlertEventStatusFn: func(ctx context.Context, eventID int64, status string, resolvedAt *time.Time) error {
+				gotEventID = eventID
+				gotStatus = status
+				gotResolvedAt = resolvedAt != nil
+				return nil
+			},
+		},
+	}
+
+	result, err := opsSvc.HandleFeishuAlertCardAction(context.Background(), OpsFeishuAlertCardAction{
+		Action:  "resolve_alert",
+		EventID: 42,
+		Token:   "card-action-token",
+	})
+	if err != nil {
+		t.Fatalf("HandleFeishuAlertCardAction() error = %v", err)
+	}
+	if result == nil || result.Status != "manual_resolved" {
+		t.Fatalf("result = %#v, want manual_resolved", result)
+	}
+	if gotEventID != 42 || gotStatus != OpsAlertStatusManualResolved || !gotResolvedAt {
+		t.Fatalf("update status got event=%d status=%q resolvedAt=%v", gotEventID, gotStatus, gotResolvedAt)
 	}
 }
 
