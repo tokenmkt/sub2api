@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
 	"net/url"
 	"strings"
@@ -21,6 +24,7 @@ const (
 
 func (s *OpsService) GetEmailNotificationConfig(ctx context.Context) (*OpsEmailNotificationConfig, error) {
 	defaultCfg := defaultOpsEmailNotificationConfig()
+	normalizeOpsEmailNotificationConfig(defaultCfg)
 	if s == nil || s.settingRepo == nil {
 		return defaultCfg, nil
 	}
@@ -45,7 +49,13 @@ func (s *OpsService) GetEmailNotificationConfig(ctx context.Context) (*OpsEmailN
 		// Corrupted JSON should not break ops UI; fall back to defaults.
 		return defaultCfg, nil
 	}
+	needsPersist := strings.TrimSpace(cfg.Feishu.Alert.ActionToken) == ""
 	normalizeOpsEmailNotificationConfig(cfg)
+	if needsPersist {
+		if b, mErr := json.Marshal(cfg); mErr == nil {
+			_ = s.settingRepo.Set(ctx, SettingKeyOpsEmailNotificationConfig, string(b))
+		}
+	}
 	return cfg, nil
 }
 
@@ -98,6 +108,9 @@ func (s *OpsService) UpdateEmailNotificationConfig(ctx context.Context, req *Ops
 		if req.Feishu.Alert.WebhookURLs != nil {
 			cfg.Feishu.Alert.WebhookURLs = req.Feishu.Alert.WebhookURLs
 		}
+		if strings.TrimSpace(req.Feishu.Alert.ActionToken) != "" {
+			cfg.Feishu.Alert.ActionToken = strings.TrimSpace(req.Feishu.Alert.ActionToken)
+		}
 	}
 
 	if err := validateOpsEmailNotificationConfig(cfg); err != nil {
@@ -143,6 +156,7 @@ func defaultOpsEmailNotificationConfig() *OpsEmailNotificationConfig {
 			Alert: OpsFeishuAlertConfig{
 				Enabled:     false,
 				WebhookURLs: []string{},
+				ActionToken: "",
 			},
 		},
 	}
@@ -164,6 +178,10 @@ func normalizeOpsEmailNotificationConfig(cfg *OpsEmailNotificationConfig) {
 
 	cfg.Alert.MinSeverity = strings.TrimSpace(cfg.Alert.MinSeverity)
 	cfg.Feishu.Alert.WebhookURLs = normalizeWebhookURLs(cfg.Feishu.Alert.WebhookURLs)
+	cfg.Feishu.Alert.ActionToken = strings.TrimSpace(cfg.Feishu.Alert.ActionToken)
+	if cfg.Feishu.Alert.ActionToken == "" {
+		cfg.Feishu.Alert.ActionToken = generateOpsFeishuActionToken()
+	}
 	cfg.Report.DailySummarySchedule = strings.TrimSpace(cfg.Report.DailySummarySchedule)
 	cfg.Report.WeeklySummarySchedule = strings.TrimSpace(cfg.Report.WeeklySummarySchedule)
 	cfg.Report.ErrorDigestSchedule = strings.TrimSpace(cfg.Report.ErrorDigestSchedule)
@@ -233,6 +251,14 @@ func normalizeWebhookURLs(values []string) []string {
 		out = append(out, trimmed)
 	}
 	return out
+}
+
+func generateOpsFeishuActionToken() string {
+	var b [32]byte
+	if _, err := rand.Read(b[:]); err == nil {
+		return hex.EncodeToString(b[:])
+	}
+	return fmt.Sprintf("%d", time.Now().UnixNano())
 }
 
 func validateHTTPWebhookURL(rawURL string) error {

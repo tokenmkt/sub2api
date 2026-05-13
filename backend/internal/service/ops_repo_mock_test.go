@@ -13,6 +13,7 @@ type opsRepoMock struct {
 	ListSystemLogsFn              func(ctx context.Context, filter *OpsSystemLogFilter) (*OpsSystemLogList, error)
 	DeleteSystemLogsFn            func(ctx context.Context, filter *OpsSystemLogCleanupFilter) (int64, error)
 	InsertSystemLogCleanupAuditFn func(ctx context.Context, input *OpsSystemLogCleanupAudit) error
+	UpdateAlertEventStatusFn      func(ctx context.Context, eventID int64, status string, resolvedAt *time.Time) error
 }
 
 func (m *opsRepoMock) InsertErrorLog(ctx context.Context, input *OpsInsertErrorLogInput) (int64, error) {
@@ -174,6 +175,9 @@ func (m *opsRepoMock) CreateAlertEvent(ctx context.Context, event *OpsAlertEvent
 }
 
 func (m *opsRepoMock) UpdateAlertEventStatus(ctx context.Context, eventID int64, status string, resolvedAt *time.Time) error {
+	if m.UpdateAlertEventStatusFn != nil {
+		return m.UpdateAlertEventStatusFn(ctx, eventID, status, resolvedAt)
+	}
 	return nil
 }
 

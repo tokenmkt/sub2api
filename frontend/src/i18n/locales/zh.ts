@@ -5069,6 +5069,8 @@ export default {
         webhooks: '飞书 Webhook',
         webhookPlaceholder: '输入飞书机器人 Webhook URL',
         webhookHint: '保存后，告警触发时会发送到已配置的飞书机器人。',
+        callbackUrl: '飞书交互回调地址',
+        callbackHint: '在飞书机器人事件订阅/交互回调中配置该地址，卡片按钮才能回写告警状态。',
         addWebhook: '添加 Webhook',
         save: '保存通知设置',
         saved: '通知设置已保存',
