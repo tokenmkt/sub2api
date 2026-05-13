@@ -5228,6 +5228,17 @@
                   <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.notifications.webhookHint") }}
                   </p>
+                  <div
+                    class="mt-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs text-blue-700 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-200"
+                  >
+                    <div class="font-medium">
+                      {{ t("admin.settings.notifications.callbackUrl") }}
+                    </div>
+                    <code class="mt-1 block break-all">{{ feishuCallbackUrl }}</code>
+                    <p class="mt-1 text-blue-600/80 dark:text-blue-200/80">
+                      {{ t("admin.settings.notifications.callbackHint") }}
+                    </p>
+                  </div>
                 </div>
 
                 <div class="mt-6 flex justify-end">
@@ -5838,6 +5849,12 @@ const notificationLoading = ref(false);
 const notificationSaving = ref(false);
 const feishuWebhookInput = ref("");
 const feishuWebhookError = ref("");
+const feishuCallbackUrl = computed(() => {
+  if (typeof window === "undefined") {
+    return "/api/v1/admin/ops/feishu/alert-callback";
+  }
+  return `${window.location.origin}/api/v1/admin/ops/feishu/alert-callback`;
+});
 const smtpPasswordManuallyEdited = ref(false);
 const testEmailAddress = ref("");
 const registrationEmailSuffixWhitelistTags = ref<string[]>([]);
@@ -7320,6 +7337,7 @@ async function saveNotificationSettings() {
           alert: {
             enabled: config.feishu.alert.enabled,
             webhook_urls: Array.from(new Set(webhooks)),
+            action_token: config.feishu.alert.action_token,
           },
         },
       }),

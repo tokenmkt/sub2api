@@ -39,6 +39,7 @@ type OpsFeishuNotificationConfig struct {
 type OpsFeishuAlertConfig struct {
 	Enabled     bool     `json:"enabled"`
 	WebhookURLs []string `json:"webhook_urls"`
+	ActionToken string   `json:"action_token,omitempty"`
 }
 
 // OpsEmailNotificationConfigUpdateRequest allows partial updates, while the

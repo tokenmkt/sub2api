@@ -694,6 +694,11 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 
 	if emailCfg.Feishu.Alert.Enabled {
 		text := buildOpsAlertFeishuText(rule, event)
+		cardContext := &OpsFeishuAlertCardContext{
+			EventID: event.ID,
+			RuleID:  rule.ID,
+			Token:   emailCfg.Feishu.Alert.ActionToken,
+		}
 		for _, webhookURL := range emailCfg.Feishu.Alert.WebhookURLs {
 			webhookURL = strings.TrimSpace(webhookURL)
 			if webhookURL == "" {
@@ -702,7 +707,7 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 			if !s.emailLimiter.Allow(time.Now().UTC()) {
 				continue
 			}
-			if err := sendFeishuWebhookNotification(ctx, webhookURL, subject, text); err != nil {
+			if err := sendFeishuWebhookNotification(ctx, webhookURL, subject, text, cardContext); err != nil {
 				// Ignore per-webhook failures; continue best-effort.
 				continue
 			}

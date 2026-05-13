@@ -806,6 +806,7 @@ export interface EmailNotificationConfig {
     alert: {
       enabled: boolean
       webhook_urls: string[]
+      action_token?: string
     }
   }
 }
