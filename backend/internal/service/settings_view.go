@@ -21,6 +21,9 @@ type SystemSettings struct {
 	InvitationCodeEnabled            bool
 	TotpEnabled                      bool // TOTP 双因素认证
 
+	EmailProvider          string
+	ResendAPIKey           string
+	ResendAPIKeyConfigured bool
 	SMTPHost               string
 	SMTPPort               int
 	SMTPUsername           string

@@ -117,6 +117,8 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		InvitationCodeEnabled:                  settings.InvitationCodeEnabled,
 		TotpEnabled:                            settings.TotpEnabled,
 		TotpEncryptionKeyConfigured:            h.settingService.IsTotpEncryptionKeyConfigured(),
+		EmailProvider:                          settings.EmailProvider,
+		ResendAPIKeyConfigured:                 settings.ResendAPIKeyConfigured,
 		SMTPHost:                               settings.SMTPHost,
 		SMTPPort:                               settings.SMTPPort,
 		SMTPUsername:                           settings.SMTPUsername,
@@ -307,13 +309,15 @@ type UpdateSettingsRequest struct {
 	TotpEnabled                      bool     `json:"totp_enabled"` // TOTP 双因素认证
 
 	// 邮件服务设置
-	SMTPHost     string `json:"smtp_host"`
-	SMTPPort     int    `json:"smtp_port"`
-	SMTPUsername string `json:"smtp_username"`
-	SMTPPassword string `json:"smtp_password"`
-	SMTPFrom     string `json:"smtp_from_email"`
-	SMTPFromName string `json:"smtp_from_name"`
-	SMTPUseTLS   bool   `json:"smtp_use_tls"`
+	EmailProvider string `json:"email_provider"`
+	ResendAPIKey  string `json:"resend_api_key"`
+	SMTPHost      string `json:"smtp_host"`
+	SMTPPort      int    `json:"smtp_port"`
+	SMTPUsername  string `json:"smtp_username"`
+	SMTPPassword  string `json:"smtp_password"`
+	SMTPFrom      string `json:"smtp_from_email"`
+	SMTPFromName  string `json:"smtp_from_name"`
+	SMTPUseTLS    bool   `json:"smtp_use_tls"`
 
 	// Cloudflare Turnstile 设置
 	TurnstileEnabled   bool   `json:"turnstile_enabled"`
@@ -577,6 +581,12 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 	req.SMTPPassword = strings.TrimSpace(req.SMTPPassword)
 	req.SMTPFrom = strings.TrimSpace(req.SMTPFrom)
 	req.SMTPFromName = strings.TrimSpace(req.SMTPFromName)
+	emailProvider := strings.TrimSpace(req.EmailProvider)
+	if emailProvider == "" && previousSettings.EmailProvider != "" {
+		emailProvider = previousSettings.EmailProvider
+	}
+	req.EmailProvider = service.NormalizeEmailProviderForSettings(emailProvider)
+	req.ResendAPIKey = strings.TrimSpace(req.ResendAPIKey)
 	if req.SMTPPort <= 0 {
 		req.SMTPPort = 587
 	}
@@ -1148,6 +1158,8 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		FrontendURL:                      req.FrontendURL,
 		InvitationCodeEnabled:            req.InvitationCodeEnabled,
 		TotpEnabled:                      req.TotpEnabled,
+		EmailProvider:                    req.EmailProvider,
+		ResendAPIKey:                     req.ResendAPIKey,
 		SMTPHost:                         req.SMTPHost,
 		SMTPPort:                         req.SMTPPort,
 		SMTPUsername:                     req.SMTPUsername,
@@ -1486,6 +1498,8 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		InvitationCodeEnabled:                  updatedSettings.InvitationCodeEnabled,
 		TotpEnabled:                            updatedSettings.TotpEnabled,
 		TotpEncryptionKeyConfigured:            h.settingService.IsTotpEncryptionKeyConfigured(),
+		EmailProvider:                          updatedSettings.EmailProvider,
+		ResendAPIKeyConfigured:                 updatedSettings.ResendAPIKeyConfigured,
 		SMTPHost:                               updatedSettings.SMTPHost,
 		SMTPPort:                               updatedSettings.SMTPPort,
 		SMTPUsername:                           updatedSettings.SMTPUsername,
@@ -1684,6 +1698,12 @@ func diffSettings(before *service.SystemSettings, after *service.SystemSettings,
 	}
 	if before.TotpEnabled != after.TotpEnabled {
 		changed = append(changed, "totp_enabled")
+	}
+	if before.EmailProvider != after.EmailProvider {
+		changed = append(changed, "email_provider")
+	}
+	if req.ResendAPIKey != "" {
+		changed = append(changed, "resend_api_key")
 	}
 	if before.SMTPHost != after.SMTPHost {
 		changed = append(changed, "smtp_host")
@@ -2196,11 +2216,13 @@ func equalNotifyEmailEntries(a, b []service.NotifyEmailEntry) bool {
 
 // TestSMTPRequest 测试SMTP连接请求
 type TestSMTPRequest struct {
-	SMTPHost     string `json:"smtp_host"`
-	SMTPPort     int    `json:"smtp_port"`
-	SMTPUsername string `json:"smtp_username"`
-	SMTPPassword string `json:"smtp_password"`
-	SMTPUseTLS   bool   `json:"smtp_use_tls"`
+	EmailProvider string `json:"email_provider"`
+	ResendAPIKey  string `json:"resend_api_key"`
+	SMTPHost      string `json:"smtp_host"`
+	SMTPPort      int    `json:"smtp_port"`
+	SMTPUsername  string `json:"smtp_username"`
+	SMTPPassword  string `json:"smtp_password"`
+	SMTPUseTLS    bool   `json:"smtp_use_tls"`
 }
 
 // TestSMTPConnection 测试SMTP连接
@@ -2214,6 +2236,25 @@ func (h *SettingHandler) TestSMTPConnection(c *gin.Context) {
 
 	req.SMTPHost = strings.TrimSpace(req.SMTPHost)
 	req.SMTPUsername = strings.TrimSpace(req.SMTPUsername)
+	req.EmailProvider = service.NormalizeEmailProviderForSettings(req.EmailProvider)
+	req.ResendAPIKey = strings.TrimSpace(req.ResendAPIKey)
+
+	if req.EmailProvider == service.EmailProviderResend {
+		var savedConfig *service.EmailConfig
+		if cfg, err := h.emailService.GetEmailConfig(c.Request.Context()); err == nil && cfg != nil {
+			savedConfig = cfg
+		}
+		apiKey := req.ResendAPIKey
+		if apiKey == "" && savedConfig != nil {
+			apiKey = savedConfig.Resend.APIKey
+		}
+		if apiKey == "" {
+			response.BadRequest(c, "Resend API key is required")
+			return
+		}
+		response.Success(c, gin.H{"message": "Resend API key configured"})
+		return
+	}
 
 	var savedConfig *service.SMTPConfig
 	if cfg, err := h.emailService.GetSMTPConfig(c.Request.Context()); err == nil && cfg != nil {
@@ -2261,14 +2302,16 @@ func (h *SettingHandler) TestSMTPConnection(c *gin.Context) {
 
 // SendTestEmailRequest 发送测试邮件请求
 type SendTestEmailRequest struct {
-	Email        string `json:"email" binding:"required,email"`
-	SMTPHost     string `json:"smtp_host"`
-	SMTPPort     int    `json:"smtp_port"`
-	SMTPUsername string `json:"smtp_username"`
-	SMTPPassword string `json:"smtp_password"`
-	SMTPFrom     string `json:"smtp_from_email"`
-	SMTPFromName string `json:"smtp_from_name"`
-	SMTPUseTLS   bool   `json:"smtp_use_tls"`
+	Email         string `json:"email" binding:"required,email"`
+	EmailProvider string `json:"email_provider"`
+	ResendAPIKey  string `json:"resend_api_key"`
+	SMTPHost      string `json:"smtp_host"`
+	SMTPPort      int    `json:"smtp_port"`
+	SMTPUsername  string `json:"smtp_username"`
+	SMTPPassword  string `json:"smtp_password"`
+	SMTPFrom      string `json:"smtp_from_email"`
+	SMTPFromName  string `json:"smtp_from_name"`
+	SMTPUseTLS    bool   `json:"smtp_use_tls"`
 }
 
 // SendTestEmail 发送测试邮件
@@ -2284,10 +2327,34 @@ func (h *SettingHandler) SendTestEmail(c *gin.Context) {
 	req.SMTPUsername = strings.TrimSpace(req.SMTPUsername)
 	req.SMTPFrom = strings.TrimSpace(req.SMTPFrom)
 	req.SMTPFromName = strings.TrimSpace(req.SMTPFromName)
+	req.EmailProvider = service.NormalizeEmailProviderForSettings(req.EmailProvider)
+	req.ResendAPIKey = strings.TrimSpace(req.ResendAPIKey)
 
+	var savedEmailConfig *service.EmailConfig
+	if cfg, err := h.emailService.GetEmailConfig(c.Request.Context()); err == nil && cfg != nil {
+		savedEmailConfig = cfg
+	}
 	var savedConfig *service.SMTPConfig
-	if cfg, err := h.emailService.GetSMTPConfig(c.Request.Context()); err == nil && cfg != nil {
-		savedConfig = cfg
+	if savedEmailConfig != nil {
+		savedConfig = &savedEmailConfig.SMTP
+	}
+
+	if req.EmailProvider == service.EmailProviderResend {
+		apiKey := req.ResendAPIKey
+		if apiKey == "" && savedEmailConfig != nil {
+			apiKey = savedEmailConfig.Resend.APIKey
+		}
+		if req.SMTPFrom == "" && savedEmailConfig != nil {
+			req.SMTPFrom = savedEmailConfig.Resend.From
+		}
+		if req.SMTPFromName == "" && savedEmailConfig != nil {
+			req.SMTPFromName = savedEmailConfig.Resend.FromName
+		}
+		if apiKey == "" || req.SMTPFrom == "" {
+			response.BadRequest(c, "Resend API key and from email are required")
+			return
+		}
+		savedConfig = nil
 	}
 
 	if req.SMTPHost == "" && savedConfig != nil {
@@ -2313,19 +2380,31 @@ func (h *SettingHandler) SendTestEmail(c *gin.Context) {
 	if req.SMTPFromName == "" && savedConfig != nil {
 		req.SMTPFromName = savedConfig.FromName
 	}
-	if req.SMTPHost == "" {
+	if req.EmailProvider == service.EmailProviderSMTP && req.SMTPHost == "" {
 		response.BadRequest(c, "SMTP host is required")
 		return
 	}
 
-	config := &service.SMTPConfig{
-		Host:     req.SMTPHost,
-		Port:     req.SMTPPort,
-		Username: req.SMTPUsername,
-		Password: password,
-		From:     req.SMTPFrom,
-		FromName: req.SMTPFromName,
-		UseTLS:   req.SMTPUseTLS,
+	resendAPIKey := req.ResendAPIKey
+	if resendAPIKey == "" && savedEmailConfig != nil {
+		resendAPIKey = savedEmailConfig.Resend.APIKey
+	}
+	config := &service.EmailConfig{
+		Provider: req.EmailProvider,
+		SMTP: service.SMTPConfig{
+			Host:     req.SMTPHost,
+			Port:     req.SMTPPort,
+			Username: req.SMTPUsername,
+			Password: password,
+			From:     req.SMTPFrom,
+			FromName: req.SMTPFromName,
+			UseTLS:   req.SMTPUseTLS,
+		},
+		Resend: service.ResendConfig{
+			APIKey:   resendAPIKey,
+			From:     req.SMTPFrom,
+			FromName: req.SMTPFromName,
+		},
 	}
 
 	siteName := h.settingService.GetSiteName(c.Request.Context())
@@ -2352,7 +2431,7 @@ func (h *SettingHandler) SendTestEmail(c *gin.Context) {
         <div class="content">
             <div class="success">✓</div>
             <h2>Email Configuration Successful!</h2>
-            <p>This is a test email to verify your SMTP settings are working correctly.</p>
+            <p>This is a test email to verify your email settings are working correctly.</p>
         </div>
         <div class="footer">
             <p>This is an automated test message.</p>

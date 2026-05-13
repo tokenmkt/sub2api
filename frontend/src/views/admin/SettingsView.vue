@@ -5346,8 +5346,50 @@
               </button>
             </div>
             <div class="space-y-6 p-6">
+              <div>
+                <label
+                  class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  {{ t("admin.settings.smtp.provider") }}
+                </label>
+                <select v-model="form.email_provider" class="input">
+                  <option value="smtp">
+                    {{ t("admin.settings.smtp.providerSmtp") }}
+                  </option>
+                  <option value="resend">
+                    {{ t("admin.settings.smtp.providerResend") }}
+                  </option>
+                </select>
+              </div>
+              <div v-if="form.email_provider === 'resend'">
+                <label
+                  class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  {{ t("admin.settings.smtp.resendApiKey") }}
+                </label>
+                <input
+                  v-model="form.resend_api_key"
+                  type="password"
+                  class="input"
+                  autocomplete="new-password"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  :placeholder="
+                    form.resend_api_key_configured
+                      ? t('admin.settings.smtp.resendApiKeyConfiguredPlaceholder')
+                      : t('admin.settings.smtp.resendApiKeyPlaceholder')
+                  "
+                />
+                <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{
+                    form.resend_api_key_configured
+                      ? t("admin.settings.smtp.resendApiKeyConfiguredHint")
+                      : t("admin.settings.smtp.resendApiKeyHint")
+                  }}
+                </p>
+              </div>
               <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
+                <div v-if="form.email_provider === 'smtp'">
                   <label
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
@@ -5360,7 +5402,7 @@
                     :placeholder="t('admin.settings.smtp.hostPlaceholder')"
                   />
                 </div>
-                <div>
+                <div v-if="form.email_provider === 'smtp'">
                   <label
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
@@ -5375,7 +5417,7 @@
                     :placeholder="t('admin.settings.smtp.portPlaceholder')"
                   />
                 </div>
-                <div>
+                <div v-if="form.email_provider === 'smtp'">
                   <label
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
@@ -5388,7 +5430,7 @@
                     :placeholder="t('admin.settings.smtp.usernamePlaceholder')"
                   />
                 </div>
-                <div>
+                <div v-if="form.email_provider === 'smtp'">
                   <label
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
@@ -5447,6 +5489,7 @@
 
               <!-- Use TLS Toggle -->
               <div
+                v-if="form.email_provider === 'smtp'"
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
@@ -5963,6 +6006,7 @@ type SettingsForm = Omit<
   oidc_connect_client_secret: string;
   force_email_on_third_party_signup: boolean;
   openai_advanced_scheduler_enabled: boolean;
+  resend_api_key: string;
 };
 
 const form = reactive<SettingsForm>({
@@ -6028,6 +6072,9 @@ const form = reactive<SettingsForm>({
     description: string;
   }>,
   frontend_url: "",
+  email_provider: "smtp",
+  resend_api_key: "",
+  resend_api_key_configured: false,
   smtp_host: "",
   smtp_port: 587,
   smtp_username: "",
@@ -6649,6 +6696,7 @@ async function loadSettings() {
         : [10, 20, 50, 100],
     );
     registrationEmailSuffixWhitelistDraft.value = "";
+    form.resend_api_key = "";
     form.smtp_password = "";
     smtpPasswordManuallyEdited.value = false;
     form.turnstile_secret_key = "";
@@ -6946,6 +6994,8 @@ async function saveSettings() {
       custom_menu_items: form.custom_menu_items,
       custom_endpoints: form.custom_endpoints,
       frontend_url: form.frontend_url,
+      email_provider: form.email_provider,
+      resend_api_key: form.resend_api_key || undefined,
       smtp_host: form.smtp_host,
       smtp_port: form.smtp_port,
       smtp_username: form.smtp_username,
@@ -7187,6 +7237,8 @@ async function testSmtpConnection() {
       ? form.smtp_password
       : "";
     const result = await adminAPI.settings.testSmtpConnection({
+      email_provider: form.email_provider,
+      resend_api_key: form.resend_api_key,
       smtp_host: form.smtp_host,
       smtp_port: form.smtp_port,
       smtp_username: form.smtp_username,
@@ -7219,6 +7271,8 @@ async function sendTestEmail() {
       : "";
     const result = await adminAPI.settings.sendTestEmail({
       email: testEmailAddress.value,
+      email_provider: form.email_provider,
+      resend_api_key: form.resend_api_key,
       smtp_host: form.smtp_host,
       smtp_port: form.smtp_port,
       smtp_username: form.smtp_username,
