@@ -183,6 +183,8 @@ vi.mock("vue-i18n", async () => {
     "admin.settings.notifications.webhooks": "飞书 Webhook",
     "admin.settings.notifications.webhookPlaceholder": "输入飞书机器人 Webhook URL",
     "admin.settings.notifications.webhookHint": "保存后，告警触发时会发送到已配置的飞书机器人。",
+    "admin.settings.notifications.callbackUrl": "飞书交互回调地址",
+    "admin.settings.notifications.callbackHint": "在飞书机器人事件订阅/交互回调中配置该地址，卡片按钮才能回写告警状态。",
     "admin.settings.notifications.addWebhook": "添加 Webhook",
     "admin.settings.notifications.save": "保存通知设置",
     "admin.settings.notifications.saved": "通知设置已保存",
@@ -459,6 +461,7 @@ const baseEmailNotificationConfig = {
     alert: {
       enabled: false,
       webhook_urls: [],
+      action_token: "card-action-token",
     },
   },
 };
@@ -623,6 +626,7 @@ describe("admin SettingsView notification settings", () => {
     const notificationPanel = wrapper.get('[data-testid="notification-settings-panel"]');
     expect(notificationPanel.text()).toContain("通知渠道设置");
     expect(notificationPanel.text()).toContain("飞书告警");
+    expect(notificationPanel.text()).toContain("/api/v1/admin/ops/feishu/alert-callback");
     expect(notificationPanel.text()).not.toContain("SMTP");
     expect(notificationPanel.text()).not.toContain("测试邮件");
 
@@ -643,6 +647,7 @@ describe("admin SettingsView notification settings", () => {
           webhook_urls: [
             "https://open.feishu.cn/open-apis/bot/v2/hook/test-token",
           ],
+          action_token: "card-action-token",
         },
       },
     });
