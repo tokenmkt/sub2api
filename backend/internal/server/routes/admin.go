@@ -14,6 +14,11 @@ func RegisterAdminRoutes(
 	h *handler.Handlers,
 	adminAuth middleware.AdminAuthMiddleware,
 ) {
+	opsPublic := v1.Group("/admin/ops")
+	{
+		opsPublic.POST("/feishu/alert-callback", h.Admin.Ops.HandleFeishuAlertCallback)
+	}
+
 	admin := v1.Group("/admin")
 	admin.Use(gin.HandlerFunc(adminAuth))
 	{

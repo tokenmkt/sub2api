@@ -4907,6 +4907,8 @@ export default {
         webhooks: 'Feishu Webhooks',
         webhookPlaceholder: 'Enter Feishu bot webhook URL',
         webhookHint: 'After saving, fired alerts are sent to the configured Feishu bots.',
+        callbackUrl: 'Feishu Interaction Callback URL',
+        callbackHint: 'Configure this URL in Feishu bot event subscriptions / interaction callbacks so card buttons can update alert status.',
         addWebhook: 'Add Webhook',
         save: 'Save Notification Settings',
         saved: 'Notification settings saved',
