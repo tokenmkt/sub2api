@@ -183,6 +183,37 @@ func TestSettingService_UpdateSettings_RegistrationEmailSuffixWhitelist_Normaliz
 	require.Equal(t, `["@example.com","@foo.bar"]`, repo.updates[SettingKeyRegistrationEmailSuffixWhitelist])
 }
 
+func TestSettingService_UpdateSettings_EmailProviderResendPersistsAPIKeyWhenProvided(t *testing.T) {
+	repo := &settingUpdateRepoStub{}
+	svc := NewSettingService(repo, &config.Config{})
+
+	err := svc.UpdateSettings(context.Background(), &SystemSettings{
+		EmailProvider: "resend",
+		ResendAPIKey:  "re_secret",
+		SMTPPort:      587,
+		SMTPFrom:      "no-reply@example.com",
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, EmailProviderResend, repo.updates[SettingKeyEmailProvider])
+	require.Equal(t, "re_secret", repo.updates[SettingKeyResendAPIKey])
+	require.Equal(t, "no-reply@example.com", repo.updates[SettingKeySMTPFrom])
+}
+
+func TestSettingService_UpdateSettings_EmailProviderResendKeepsExistingAPIKeyWhenBlank(t *testing.T) {
+	repo := &settingUpdateRepoStub{}
+	svc := NewSettingService(repo, &config.Config{})
+
+	err := svc.UpdateSettings(context.Background(), &SystemSettings{
+		EmailProvider: "resend",
+		SMTPPort:      587,
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, EmailProviderResend, repo.updates[SettingKeyEmailProvider])
+	require.NotContains(t, repo.updates, SettingKeyResendAPIKey)
+}
+
 func TestSettingService_UpdateSettings_RegistrationEmailSuffixWhitelist_Invalid(t *testing.T) {
 	repo := &settingUpdateRepoStub{}
 	svc := NewSettingService(repo, &config.Config{})

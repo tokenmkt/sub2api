@@ -34,6 +34,8 @@ type SystemSettings struct {
 	TotpEnabled                      bool     `json:"totp_enabled"`                   // TOTP 双因素认证
 	TotpEncryptionKeyConfigured      bool     `json:"totp_encryption_key_configured"` // TOTP 加密密钥是否已配置
 
+	EmailProvider          string `json:"email_provider"`
+	ResendAPIKeyConfigured bool   `json:"resend_api_key_configured"`
 	SMTPHost               string `json:"smtp_host"`
 	SMTPPort               int    `json:"smtp_port"`
 	SMTPUsername           string `json:"smtp_username"`

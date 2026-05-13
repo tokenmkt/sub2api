@@ -1,15 +1,18 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/subtle"
 	"crypto/tls"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"math/big"
 	"net"
+	"net/http"
 	"net/smtp"
 	"net/url"
 	"strconv"
@@ -81,6 +84,11 @@ const (
 	passwordResetEmailCooldown = 30 * time.Second
 )
 
+const (
+	EmailProviderSMTP   = "smtp"
+	EmailProviderResend = "resend"
+)
+
 // SMTPConfig SMTP配置
 type SMTPConfig struct {
 	Host     string
@@ -92,23 +100,56 @@ type SMTPConfig struct {
 	UseTLS   bool
 }
 
+// ResendConfig contains configuration for the Resend HTTPS email API.
+type ResendConfig struct {
+	APIKey   string
+	From     string
+	FromName string
+}
+
+// EmailConfig contains the selected email provider and provider-specific config.
+type EmailConfig struct {
+	Provider string
+	SMTP     SMTPConfig
+	Resend   ResendConfig
+}
+
 // EmailService 邮件服务
 type EmailService struct {
-	settingRepo SettingRepository
-	cache       EmailCache
+	settingRepo      SettingRepository
+	cache            EmailCache
+	resendAPIBaseURL string
+	httpClient       *http.Client
 }
 
 // NewEmailService 创建邮件服务实例
 func NewEmailService(settingRepo SettingRepository, cache EmailCache) *EmailService {
 	return &EmailService{
-		settingRepo: settingRepo,
-		cache:       cache,
+		settingRepo:      settingRepo,
+		cache:            cache,
+		resendAPIBaseURL: "https://api.resend.com",
+		httpClient:       &http.Client{Timeout: smtpIOTimeout},
 	}
+}
+
+// SetResendAPIBaseURLForTest overrides the Resend endpoint in unit tests.
+func (s *EmailService) SetResendAPIBaseURLForTest(baseURL string) {
+	s.resendAPIBaseURL = strings.TrimRight(strings.TrimSpace(baseURL), "/")
 }
 
 // GetSMTPConfig 从数据库获取SMTP配置
 func (s *EmailService) GetSMTPConfig(ctx context.Context) (*SMTPConfig, error) {
+	config, err := s.GetEmailConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &config.SMTP, nil
+}
+
+// GetEmailConfig returns the selected email provider configuration.
+func (s *EmailService) GetEmailConfig(ctx context.Context) (*EmailConfig, error) {
 	keys := []string{
+		SettingKeyEmailProvider,
 		SettingKeySMTPHost,
 		SettingKeySMTPPort,
 		SettingKeySMTPUsername,
@@ -116,16 +157,30 @@ func (s *EmailService) GetSMTPConfig(ctx context.Context) (*SMTPConfig, error) {
 		SettingKeySMTPFrom,
 		SettingKeySMTPFromName,
 		SettingKeySMTPUseTLS,
+		SettingKeyResendAPIKey,
 	}
 
 	settings, err := s.settingRepo.GetMultiple(ctx, keys)
 	if err != nil {
-		return nil, fmt.Errorf("get smtp settings: %w", err)
+		return nil, fmt.Errorf("get email settings: %w", err)
 	}
 
-	host := strings.TrimSpace(settings[SettingKeySMTPHost])
-	if host == "" {
-		return nil, ErrEmailNotConfigured
+	provider := normalizeEmailProvider(settings[SettingKeyEmailProvider])
+	config := &EmailConfig{
+		Provider: provider,
+		SMTP: SMTPConfig{
+			Host:     strings.TrimSpace(settings[SettingKeySMTPHost]),
+			Username: strings.TrimSpace(settings[SettingKeySMTPUsername]),
+			Password: strings.TrimSpace(settings[SettingKeySMTPPassword]),
+			From:     strings.TrimSpace(settings[SettingKeySMTPFrom]),
+			FromName: strings.TrimSpace(settings[SettingKeySMTPFromName]),
+			UseTLS:   settings[SettingKeySMTPUseTLS] == "true",
+		},
+		Resend: ResendConfig{
+			APIKey:   strings.TrimSpace(settings[SettingKeyResendAPIKey]),
+			From:     strings.TrimSpace(settings[SettingKeySMTPFrom]),
+			FromName: strings.TrimSpace(settings[SettingKeySMTPFromName]),
+		},
 	}
 
 	port := 587 // 默认端口
@@ -134,23 +189,41 @@ func (s *EmailService) GetSMTPConfig(ctx context.Context) (*SMTPConfig, error) {
 			port = p
 		}
 	}
+	config.SMTP.Port = port
 
-	useTLS := settings[SettingKeySMTPUseTLS] == "true"
+	switch provider {
+	case EmailProviderResend:
+		if config.Resend.APIKey == "" || config.Resend.From == "" {
+			return nil, ErrEmailNotConfigured
+		}
+	case EmailProviderSMTP:
+		if config.SMTP.Host == "" {
+			return nil, ErrEmailNotConfigured
+		}
+	default:
+		return nil, ErrEmailNotConfigured
+	}
 
-	return &SMTPConfig{
-		Host:     host,
-		Port:     port,
-		Username: strings.TrimSpace(settings[SettingKeySMTPUsername]),
-		Password: strings.TrimSpace(settings[SettingKeySMTPPassword]),
-		From:     strings.TrimSpace(settings[SettingKeySMTPFrom]),
-		FromName: strings.TrimSpace(settings[SettingKeySMTPFromName]),
-		UseTLS:   useTLS,
-	}, nil
+	return config, nil
+}
+
+func normalizeEmailProvider(provider string) string {
+	switch strings.ToLower(strings.TrimSpace(provider)) {
+	case EmailProviderResend:
+		return EmailProviderResend
+	default:
+		return EmailProviderSMTP
+	}
+}
+
+// NormalizeEmailProviderForSettings normalizes admin-provided email provider values.
+func NormalizeEmailProviderForSettings(provider string) string {
+	return normalizeEmailProvider(provider)
 }
 
 // SendEmail 发送邮件（使用数据库中保存的配置）
 func (s *EmailService) SendEmail(ctx context.Context, to, subject, body string) error {
-	config, err := s.GetSMTPConfig(ctx)
+	config, err := s.GetEmailConfig(ctx)
 	if err != nil {
 		return err
 	}
@@ -161,7 +234,21 @@ const smtpDialTimeout = 10 * time.Second
 const smtpIOTimeout = 20 * time.Second
 
 // SendEmailWithConfig 使用指定配置发送邮件
-func (s *EmailService) SendEmailWithConfig(config *SMTPConfig, to, subject, body string) error {
+func (s *EmailService) SendEmailWithConfig(config any, to, subject, body string) error {
+	switch cfg := config.(type) {
+	case *EmailConfig:
+		if cfg.Provider == EmailProviderResend {
+			return s.sendEmailWithResend(cfg.Resend, to, subject, body)
+		}
+		return s.sendEmailWithSMTP(&cfg.SMTP, to, subject, body)
+	case *SMTPConfig:
+		return s.sendEmailWithSMTP(cfg, to, subject, body)
+	default:
+		return ErrEmailNotConfigured
+	}
+}
+
+func (s *EmailService) sendEmailWithSMTP(config *SMTPConfig, to, subject, body string) error {
 	// Sanitize all SMTP header fields to prevent header injection (CR/LF removal).
 	to = sanitizeEmailHeader(to)
 	subject = sanitizeEmailHeader(subject)
@@ -182,6 +269,62 @@ func (s *EmailService) SendEmailWithConfig(config *SMTPConfig, to, subject, body
 	}
 
 	return s.sendMailPlain(addr, auth, config.From, to, []byte(msg), config.Host)
+}
+
+func (s *EmailService) sendEmailWithResend(config ResendConfig, to, subject, body string) error {
+	to = sanitizeEmailHeader(to)
+	subject = sanitizeEmailHeader(subject)
+	from := sanitizeEmailHeader(config.From)
+	if config.FromName != "" {
+		from = fmt.Sprintf("%s <%s>", sanitizeEmailHeader(config.FromName), sanitizeEmailHeader(config.From))
+	}
+
+	payload := map[string]any{
+		"from":    from,
+		"to":      []string{to},
+		"subject": subject,
+		"html":    body,
+	}
+	bodyBytes, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("marshal resend payload: %w", err)
+	}
+
+	baseURL := strings.TrimRight(s.resendAPIBaseURL, "/")
+	if baseURL == "" {
+		baseURL = "https://api.resend.com"
+	}
+	req, err := http.NewRequest(http.MethodPost, baseURL+"/emails", bytes.NewReader(bodyBytes))
+	if err != nil {
+		return fmt.Errorf("create resend request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+config.APIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := s.httpClient
+	if client == nil {
+		client = &http.Client{Timeout: smtpIOTimeout}
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("resend send: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var errPayload struct {
+			Message string `json:"message"`
+			Name    string `json:"name"`
+		}
+		_ = json.NewDecoder(resp.Body).Decode(&errPayload)
+		msg := strings.TrimSpace(errPayload.Message)
+		if msg == "" {
+			msg = resp.Status
+		}
+		return fmt.Errorf("resend send failed: %s", msg)
+	}
+
+	return nil
 }
 
 // sendMailPlain sends mail without TLS using a dialer with timeout.
