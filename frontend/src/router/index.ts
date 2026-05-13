@@ -145,6 +145,15 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/install-guide',
+    name: 'InstallGuide',
+    component: () => import('@/views/InstallGuideView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Install Guide'
+    }
+  },
+  {
     path: '/legal/:documentId',
     name: 'LegalDocument',
     component: () => import('@/views/public/LegalDocumentView.vue'),
@@ -716,7 +725,7 @@ router.beforeEach((to, _from, next) => {
     const menuItem = publicItems.find((item) => item.id === id)
       ?? (authStore.isAdmin ? adminSettingsStore.customMenuItems.find((item) => item.id === id) : undefined)
     if (menuItem?.label) {
-      const siteName = appStore.siteName || 'Sub2API'
+      const siteName = appStore.siteName || 'apia8'
       document.title = `${menuItem.label} - ${siteName}`
     } else {
       document.title = resolveDocumentTitle(to.meta.title, appStore.siteName, to.meta.titleKey as string)

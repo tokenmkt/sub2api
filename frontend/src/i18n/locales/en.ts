@@ -9,89 +9,57 @@ export default {
     dashboard: 'Dashboard',
     login: 'Login',
     getStarted: 'Get Started',
+    installGuide: 'Install Guide',
     goToDashboard: 'Go to Dashboard',
-    // User-focused value proposition
-    heroSubtitle: 'One Key, All AI Models',
-    heroDescription: 'No need to manage multiple subscriptions. Access Claude, GPT, Gemini and more with a single API key',
-    tags: {
-      subscriptionToApi: 'Subscription to API',
-      stickySession: 'Session Persistence',
-      realtimeBilling: 'Pay As You Go'
+    badge: 'Official API Access',
+    heroTitle: 'Official AI API Gateway',
+    heroSubtitle:
+      'Direct access to official model capabilities with a stable, native-grade API layer built for sustained high traffic.',
+    heroDescription:
+      'apia8 is designed for production workloads with unified auth, smart routing, realtime billing, and health-aware failover that keeps upstream capability dependable inside your system.',
+    heroSecondaryCta: 'View Documentation',
+    quickstart: {
+      label: 'Quickstart',
+      title: 'Almost no integration changes',
+      filename: 'quickstart.py',
+      comment: '# Only replace base_url, keep the rest unchanged',
+      response: 'Hello! I am the apia8 official API gateway.'
     },
-    // Pain points section
-    painPoints: {
-      title: 'Sound Familiar?',
-      items: {
-        expensive: {
-          title: 'High Subscription Costs',
-          desc: 'Paying for multiple AI subscriptions that add up every month'
-        },
-        complex: {
-          title: 'Account Chaos',
-          desc: 'Managing scattered accounts and API keys across different platforms'
-        },
-        unstable: {
-          title: 'Service Interruptions',
-          desc: 'Single accounts hitting rate limits and disrupting your workflow'
-        },
-        noControl: {
-          title: 'No Usage Control',
-          desc: "Can't track where your money goes or limit team member usage"
-        }
+    metrics: {
+      official: {
+        label: 'Official API',
+        value: 'Direct'
+      },
+      stability: {
+        label: 'Stable Routing',
+        value: '24/7'
+      },
+      purity: {
+        label: 'Native Fidelity',
+        value: 'Raw'
       }
     },
-    // Solutions section
-    solutions: {
-      title: 'We Solve These Problems',
-      subtitle: 'Three simple steps to stress-free AI access'
+    trust: {
+      title: 'An access layer built for high-traffic production workloads',
+      subtitle: 'Not just API availability, but dependable long-term delivery for real business traffic.'
     },
     features: {
-      unifiedGateway: 'One-Click Access',
-      unifiedGatewayDesc: 'Get a single API key to call all connected AI models. No separate applications needed.',
-      multiAccount: 'Always Reliable',
-      multiAccountDesc: 'Smart routing across multiple upstream accounts with automatic failover. Say goodbye to errors.',
-      balanceQuota: 'Pay What You Use',
-      balanceQuotaDesc: 'Usage-based billing with quota limits. Full visibility into team consumption.'
-    },
-    // Comparison section
-    comparison: {
-      title: 'Why Choose Us?',
-      headers: {
-        feature: 'Comparison',
-        official: 'Official Subscriptions',
-        us: 'Our Platform'
+      official: {
+        title: 'Official API Access',
+        desc: 'Stay aligned with upstream auth patterns, interface capability, and model evolution.'
       },
-      items: {
-        pricing: {
-          feature: 'Pricing',
-          official: 'Fixed monthly fee, pay even if unused',
-          us: 'Pay only for what you use'
-        },
-        models: {
-          feature: 'Model Selection',
-          official: 'Single provider only',
-          us: 'Switch between models freely'
-        },
-        management: {
-          feature: 'Account Management',
-          official: 'Manage each service separately',
-          us: 'Unified key, one dashboard'
-        },
-        stability: {
-          feature: 'Stability',
-          official: 'Single account rate limits',
-          us: 'Multi-account pool, auto-failover'
-        },
-        control: {
-          feature: 'Usage Control',
-          official: 'Not available',
-          us: 'Quotas & detailed analytics'
-        }
+      stability: {
+        title: 'Stable Under High Traffic',
+        desc: 'Use health-aware routing, multi-node balancing, and automatic switchover to reduce disruption.'
+      },
+      purity: {
+        title: 'Native Model Delivery Path',
+        desc: 'Minimize unnecessary middleware interference so results stay close to official output.'
       }
     },
     providers: {
       title: 'Supported AI Models',
-      description: 'One API, Multiple Choices',
+      description: 'One API connected to major official model providers',
       supported: 'Supported',
       soon: 'Soon',
       claude: 'Claude',
@@ -99,14 +67,97 @@ export default {
       antigravity: 'Antigravity',
       more: 'More'
     },
-    // CTA section
     cta: {
-      title: 'Ready to Get Started?',
-      description: 'Sign up now and get free trial credits to experience seamless AI access',
-      button: 'Sign Up Free'
+      title: 'Bring official AI capability into your product with a steadier API layer',
+      description: 'Start integrating after signup, with a setup shaped for production API traffic.',
+      button: 'Start Integration'
     },
     footer: {
       allRightsReserved: 'All rights reserved.'
+    }
+  },
+
+  installGuide: {
+    badge: 'Install & Configure',
+    title: 'Install Guide',
+    subtitle: 'Choose the setup that matches your AI CLI tool and connect to the apia8 official API gateway in minutes.',
+    backHome: 'Back Home',
+    overviewTitle: 'See the flow first',
+    stepPrefix: 'Step',
+    checklistTitle: 'Before You Start',
+    optionalEyebrow: 'Optional',
+    optionalTitle: 'Additional Configuration',
+    copy: 'Copy',
+    copySuccess: 'Copied to clipboard',
+    tipsEyebrow: 'Best Practice',
+    tipsTitle: 'Recommended Setup Tips',
+    labels: {
+      install: 'Install',
+      config: 'Config',
+      verify: 'Verify'
+    },
+    blockEyebrows: {
+      install: 'Install Command',
+      config: 'Config File',
+      auth: 'Auth File',
+      env: 'Environment',
+      ide: 'Editor Config',
+      verify: 'Verify Command'
+    },
+    tip1: 'Copy the complete configuration together so old local variables do not override the new gateway setup.',
+    tip2: 'If you already use an OpenAI-compatible workflow, you usually only need to replace the base URL and API key.',
+    tip3: 'After setup, run one minimal verification command before using it in real traffic.',
+    codex: {
+      summaryTitle: 'Codex CLI Setup',
+      summary: 'Best for OpenAI-compatible workflows. Add one config file and one auth file, then launch with `codex`.',
+      installValue: 'Install Codex CLI globally',
+      configValue: 'Write ~/.codex/config.toml and auth.json',
+      verifyValue: 'Run codex in terminal',
+      check1: 'Make sure Node.js 18+ is available on your machine.',
+      check2: 'Prepare your apia8 API key such as sk-apia8-....',
+      check3: 'Back up any existing ~/.codex files before replacing them.',
+      installBlockTitle: 'Install Codex CLI',
+      installBlockDesc: 'Run a global install first if Codex CLI is not already available.',
+      configBlockTitle: 'Create the Codex config file',
+      configBlockDesc: 'Point the provider to OpenAI-compatible responses via the apia8 gateway.',
+      authBlockTitle: 'Create the API key file',
+      authBlockDesc: 'Store your apia8 key in auth.json so the CLI can load it automatically.',
+      verifyBlockTitle: 'Verify the setup',
+      verifyBlockDesc: 'If the CLI opens normally and can continue the session, the setup is working.'
+    },
+    claude: {
+      summaryTitle: 'Claude Code Setup',
+      summary: 'Best for Claude Code and VSCode Claude Code workflows. The key step is switching Anthropic environment variables to apia8.',
+      installValue: 'Install Claude Code globally',
+      configValue: 'Set ANTHROPIC_BASE_URL and token',
+      verifyValue: 'Run claude in terminal',
+      check1: 'Make sure Node.js is installed and npm is available.',
+      check2: 'Prepare your apia8 API key and confirm the gateway domain is reachable.',
+      check3: 'If you use Claude Code in both terminal and VSCode, configure both with the same values.',
+      installBlockTitle: 'Install Claude Code',
+      installBlockDesc: 'Install the official CLI first, then point it to apia8.',
+      envBlockTitle: 'Set terminal environment variables',
+      envBlockDesc: 'Base URL, auth token, and nonessential traffic control are the key values for terminal usage.',
+      ideBlockTitle: 'Configure VSCode Claude Code',
+      ideBlockDesc: 'If you use Claude Code inside VSCode, inject the same environment variables into settings.json.',
+      verifyBlockTitle: 'Verify the setup',
+      verifyBlockDesc: 'If Claude Code starts a session successfully, the connection is using apia8.'
+    },
+    gemini: {
+      summaryTitle: 'Gemini CLI Setup',
+      summary: 'Best for Gemini CLI users. This flow is lightweight: install the CLI and export three environment variables.',
+      installValue: 'Install Gemini CLI globally',
+      configValue: 'Set Google Gemini base URL and key',
+      verifyValue: 'Run gemini in terminal',
+      check1: 'Make sure Node.js 18+ is available on your machine.',
+      check2: 'Prepare your apia8 API key and confirm network access to the apia8 gateway.',
+      check3: 'If older Gemini environment variables already exist locally, clear them before applying the new setup.',
+      installBlockTitle: 'Install Gemini CLI',
+      installBlockDesc: 'Install the CLI first, then route it through the apia8 Gemini gateway endpoint.',
+      envBlockTitle: 'Set Gemini environment variables',
+      envBlockDesc: 'Set the base URL, API key, and default model so the CLI uses apia8.',
+      verifyBlockTitle: 'Verify the setup',
+      verifyBlockDesc: 'If Gemini CLI opens a normal command session, the setup is complete.'
     }
   },
 
@@ -182,8 +233,8 @@ export default {
 
   // Setup Wizard
   setup: {
-    title: 'Sub2API Setup',
-    description: 'Configure your Sub2API instance',
+    title: 'apia8 Setup',
+    description: 'Configure your apia8 instance',
     database: {
       title: 'Database Configuration',
       description: 'Connect to your PostgreSQL database',
@@ -382,7 +433,6 @@ export default {
     channelPricing: 'Channel Pricing',
     channelMonitor: 'Channel Monitor',
     channelStatus: 'Channel Status',
-    riskControl: 'Risk Control',
   },
 
   // Auth
@@ -411,9 +461,6 @@ export default {
     passwordRequired: 'Password is required',
     passwordMinLength: 'Password must be at least 6 characters',
     loginFailed: 'Login failed. Please check your credentials and try again.',
-    errors: {
-      USER_NOT_ACTIVE: 'Account has been disabled.',
-    },
     registrationFailed: 'Registration failed. Please try again.',
     emailSuffixNotAllowed: 'This email domain is not allowed for registration.',
     emailSuffixNotAllowedWithAllowed:
@@ -476,9 +523,6 @@ export default {
       completing: 'Completing registration…',
       completeRegistrationFailed: 'Registration failed. Please check your invitation code and try again.'
     },
-    emailOAuth: {
-      signIn: 'Continue with {providerName}'
-    },
     oidc: {
       signIn: 'Continue with {providerName}',
       callbackTitle: 'Signing you in with {providerName}',
@@ -538,8 +582,6 @@ export default {
     oauth: {
       callbackTitle: 'OAuth Callback',
       callbackHint: 'Copy the code and state back to the admin authorization flow when needed.',
-      invalidCallbackTitle: 'Invalid sign-in callback',
-      invalidCallbackHint: 'This page does not contain a valid authorization result. Return to the login page and start quick sign-in again.',
       code: 'Code',
       state: 'State',
       fullUrl: 'Full URL'
@@ -2292,8 +2334,6 @@ export default {
         webSearchEmulation: 'Web Search Emulation',
         webSearchEmulationHint: '⚠️ When enabled, all accounts in this channel\'s Anthropic groups will intercept web_search requests. Use with caution.',
         webSearchEmulationGlobalDisabled: 'Please enable the global switch first in Settings → Gateway → Web Search Emulation',
-        codexImageGenerationBridge: 'Codex Image Generation Bridge',
-        codexImageGenerationBridgeHint: 'When enabled, Codex /responses text requests in OpenAI groups may be automatically given the image_generation tool. Keep off unless the routed accounts support image generation.',
         basicSettings: 'Basic Settings',
         addPlatform: 'Add Platform',
         noPlatforms: 'Click "Add Platform" to start configuring the channel',
@@ -2314,216 +2354,6 @@ export default {
         noGroupsInChannel: 'No groups selected in platform tabs above',
         unnamed: 'Unnamed'
       }
-    },
-
-    riskControl: {
-      title: 'Risk Control',
-      description: 'Configure content moderation and review audit records',
-      loadFailed: 'Failed to load risk control',
-      saveFailed: 'Failed to save content moderation config',
-      logsFailed: 'Failed to load audit records',
-      saved: 'Content moderation config saved',
-      refresh: 'Refresh',
-      config: 'Content Moderation Config',
-      configHint: 'Use OpenAI Moderations to score request content and handle threshold hits by mode.',
-      openSettings: 'Moderation Settings',
-      settingsTitle: 'Content Moderation Settings',
-      refreshStatus: 'Refresh Status',
-      records: 'Audit Records',
-      recordsHint: 'Shows hits, blocks, errors, and sampled records.',
-      saveConfig: 'Save Moderation Config',
-      statusFailed: 'Failed to load runtime status',
-      enabled: 'Enable Content Moderation',
-      enabledHint: 'When off, gateway requests are not moderated even if the menu is enabled.',
-      mode: 'Global Mode',
-      modePreBlock: 'Pre-Block',
-      modePreBlockDesc: 'Synchronously reviews the latest user input before every request and rejects hits immediately.',
-      modeObserve: 'Observe Only',
-      modeObserveDesc: 'Requests pass through while the latest user input is queued for async review; hits are recorded, notified, and counted.',
-      modeOff: 'Off',
-      modeOffDesc: 'Content moderation is disabled and no audit records are written.',
-      baseUrl: 'OpenAI Base URL',
-      model: 'Model',
-      apiKey: 'OpenAI API Key',
-      apiKeys: 'OpenAI API Keys',
-      apiKeyCount: '{count} keys',
-      apiKeyPlaceholder: 'Enter API Key',
-      apiKeysPlaceholder: 'Add API Keys, one per line. They will be appended on save.',
-      apiKeysPlaceholderReplace: 'Replace API Keys, one per line. Stored keys will be replaced on save.',
-      apiKeysPlaceholderKeep: 'Add API Keys, one per line. They will be appended on save.',
-      apiKeysHint: '{count} keys are currently stored. This input only adds keys; save appends and de-duplicates them.',
-      apiKeysWriteMode: 'Write mode',
-      apiKeysModeAppend: 'Add',
-      apiKeysModeReplace: 'Replace',
-      apiKeysModeAppendHint: 'Default: save appends input keys and keeps stored keys.',
-      apiKeysModeReplaceHint: 'Replace mode: save replaces all stored keys with input keys.',
-      apiKeysReplaceWarning: 'Replace mode',
-      apiKeysReplaceNoInput: 'Replace mode requires at least 1 API Key',
-      apiKeyPlaceholderKeep: 'Leave empty to keep current key',
-      apiKeyWillClear: 'Configured key will be cleared on save',
-      apiKeyConfigured: 'Configured',
-      apiKeyTemporary: 'Pending',
-      apiKeyPendingDelete: 'Pending delete',
-      apiKeyPendingDeleteCount: '{count} keys pending deletion',
-      deleteApiKey: 'Delete this key',
-      undoDeleteApiKey: 'Undo delete',
-      inputApiKeyCount: '{count} keys in input',
-      storedApiKeyCount: '{count} stored keys',
-      testInputApiKeys: 'Test input keys',
-      testStoredApiKeys: 'Test stored keys',
-      testContentWithStoredApiKey: 'Test content with stored key',
-      testingApiKeys: 'Testing',
-      apiKeyTestNoInput: 'Enter OpenAI API Keys to test first',
-      apiKeyTestDone: 'Key test completed for {count} keys',
-      apiKeyTestFailed: 'Failed to test OpenAI API Keys',
-      apiKeyHealth: 'Key Availability',
-      apiKeyFreezeRule: '400 does not freeze; 401/403 freeze for 10 minutes; 429/529 freeze for 1 minute; other HTTP errors freeze for 10 seconds.',
-      apiKeyRows: '{count} keys',
-      apiKeyRowsCollapsed: '{count} keys hidden',
-      apiKeyRowsExpanded: 'Showing all {count} keys',
-      expandApiKeyRows: 'Expand',
-      collapseApiKeyRows: 'Collapse',
-      apiKeyHealthEmpty: 'No key status yet',
-      apiKeyHealthEmptyHint: 'Save keys or test input keys to see availability.',
-      apiKeyStatusOk: 'Available',
-      apiKeyStatusError: 'Error',
-      apiKeyStatusFrozen: 'Frozen',
-      apiKeyStatusUnknown: 'Untested',
-      apiKeyFailureCount: '{count} failures',
-      apiKeyLatency: '{ms} ms',
-      apiKeyHTTPStatus: 'HTTP {status}',
-      apiKeyFrozenUntil: 'Frozen until {time}',
-      apiKeyLastChecked: 'Checked at {time}',
-      apiKeyNotTested: 'Not tested',
-      auditTestInput: 'Audit Test Input',
-      auditTestInputHint: 'Enter a prompt and upload or paste images; images are sent as base64 and are not stored.',
-      auditTestPromptPlaceholder: 'Enter a user prompt to test; leave empty to only test key availability.',
-      auditTestImages: 'Test Images',
-      auditTestImagesHint: 'Upload, drag, or paste images. Up to 1 image, 8MB each.',
-      addAuditTestImage: 'Add image',
-      clearAuditTest: 'Clear test',
-      auditTestImageLimit: 'You can add up to {count} test images',
-      auditTestImageTooLarge: 'Each test image must be 8MB or smaller',
-      auditTestImageReadFailed: 'Failed to read test image',
-      auditTestResult: 'Audit Test Result',
-      auditTestHighest: 'Top category {category}, score {score}',
-      auditTestComposite: 'Composite score',
-      auditTestFlagged: 'Threshold hit',
-      auditTestPassed: 'Pass',
-      notConfigured: 'Not configured',
-      clearApiKey: 'Clear stored key',
-      keepApiKey: 'Keep stored key',
-      timeoutMs: 'HTTP Timeout (ms)',
-      retryCount: 'Retry Count',
-      sampleRate: 'Sample Rate',
-      recordNonHits: 'Record Non-Hits',
-      recordNonHitsHint: 'When enabled, sampled non-hit request summaries are redacted before storage.',
-      preHashCheck: 'Enable Pre-Hash Check',
-      preHashCheckHint: 'Hashes from async hits are blocked before moderation; this does not send email or increment ban counters.',
-      flaggedHashCount: 'Current hash collection size: {count}',
-      flaggedHashHint: 'Hashes are stored permanently in Redis; paste a full 64-character hash to remove a false block, or clear all stored hashes.',
-      flaggedHashPlaceholder: 'Paste full 64-character input hash',
-      deleteFlaggedHash: 'Delete hash',
-      clearFlaggedHashes: 'Clear all',
-      clearFlaggedHashesConfirm: 'Clear all risk input hashes? This does not delete audit records, but removes all historical hash blocks.',
-      flaggedHashDeleted: 'Risk hash deleted',
-      flaggedHashNotFound: 'Risk hash not found',
-      flaggedHashDeleteFailed: 'Failed to delete risk hash',
-      flaggedHashesCleared: 'Cleared {count} risk hashes',
-      flaggedHashesClearFailed: 'Failed to clear risk hashes',
-      workerCount: 'Worker Count',
-      queueSize: 'Async Queue Size',
-      blockStatus: 'Block HTTP Status',
-      blockMessage: 'Custom Block Message',
-      emailOnHit: 'Email on Hit',
-      emailOnHitHint: 'When enabled, send a risk-control email on every hit; auto-ban notices are always sent.',
-      autoBan: 'Auto Ban User',
-      autoBanHint: 'Disable the user, invalidate auth cache, and send a ban notice after the hit threshold is reached.',
-      banThreshold: 'Ban Threshold',
-      violationWindowHours: 'Count Window (hours)',
-      hitRetentionDays: 'Hit Record Retention (days)',
-      nonHitRetentionDays: 'Non-Hit Record Retention (days, max 3)',
-      violationCount: '{count} hits',
-      emailSent: 'Email sent',
-      emailNotSent: 'No email',
-      autoBanned: 'Banned',
-      unbanUser: 'Unban',
-      unbanSuccess: 'User has been unbanned',
-      unbanFailed: 'Failed to unban user',
-      inputDetailTitle: 'Input Summary Detail',
-      inputDetailContent: 'Full Content',
-      queueDelay: 'Queued {ms} ms',
-      allGroups: 'All Groups',
-      allGroupsHint: 'Auditing all groups',
-      selectedGroupsHint: 'Auditing selected groups',
-      groupScope: 'Audit Groups',
-      groupScopeHint: 'Switch on for all groups, or turn off to choose specific groups.',
-      selectedGroups: 'Selected Groups',
-      searchGroups: 'Search group name or platform',
-      noGroups: 'No groups available',
-      emptyLogs: 'No audit records',
-      workerStatus: 'Worker Runtime',
-      workerStatusHint: 'Queue and worker pool status for asynchronous observation tasks.',
-      workerPool: 'Worker Pool',
-      workerPoolMeta: '{active} processing, {idle} idle and ready, {total} total',
-      queueUsage: 'Queue Usage',
-      activeWorkers: 'Processing',
-      idleWorkers: 'Idle Ready',
-      workerActive: 'Processing an asynchronous audit task',
-      workerIdle: 'Started, idle and ready',
-      workerDisabled: 'Risk control or content audit is disabled',
-      processed: 'Processed',
-      droppedErrors: 'Dropped / Errors',
-      autoRefresh: 'Auto refresh every 15s',
-      lastCleanup: 'Last cleanup: {time}',
-      cleanupStats: 'Last cleanup deleted {hit} hits and {nonHit} non-hits',
-      riskSwitchOff: 'System switch off',
-      tabs: {
-        basic: 'Basic',
-        scope: 'Scope',
-        runtime: 'Runtime',
-        response: 'Hit Notice',
-        retention: 'Retention',
-      },
-      overview: {
-        status: 'Status',
-        enabled: 'Enabled',
-        disabled: 'Disabled',
-        apiKey: 'API Key',
-        groupScope: 'Scope',
-        logs: 'Audit Records',
-        currentFilter: 'Current filter',
-      },
-      filters: {
-        search: 'Search user/key/summary',
-        from: 'From',
-        to: 'To',
-        allGroups: 'All Groups',
-        allEndpoints: 'All Endpoints',
-      },
-      table: {
-        time: 'Time',
-        group: 'Group',
-        user: 'User',
-        apiKey: 'API Key',
-        endpoint: 'Endpoint',
-        result: 'Result',
-        highest: 'Highest',
-        actionMeta: 'Action',
-        latency: 'Latency',
-        input: 'Input Summary',
-      },
-      result: {
-        all: 'All Results',
-        hit: 'Hit',
-        blocked: 'Blocked',
-        pass: 'Pass',
-        error: 'Error',
-      },
-      action: {
-        block: 'Blocked',
-        error: 'Error',
-      },
     },
 
     // Channel Monitor
@@ -2777,11 +2607,6 @@ export default {
       dataExportSelected: 'Export Selected',
       dataExportIncludeProxies: 'Include proxies linked to the exported accounts',
       dataImport: 'Import',
-      moreActions: 'More Actions',
-      dataActions: 'Data',
-      toolActions: 'Tools',
-      viewColumns: 'Columns',
-      selectedCount: '{count} selected',
       dataExportConfirmMessage: 'The exported data contains sensitive account and proxy information. Store it securely.',
       dataExportConfirm: 'Confirm Export',
       dataExported: 'Data exported successfully',
@@ -3157,18 +2982,6 @@ export default {
         codexCLIOnly: 'Codex official clients only',
         codexCLIOnlyDesc:
           'Only applies to OpenAI OAuth. When enabled, only Codex official client families are allowed; when disabled, the gateway bypasses this restriction and keeps existing behavior.',
-        codexImageGenerationBridge: 'Codex image-generation bridge',
-        codexImageGenerationBridgeDesc:
-          'Account policy takes precedence over channel and global settings. Only controls whether Codex requests through the /responses text endpoint receive the image_generation tool; standalone image-generation endpoints are unaffected.',
-        codexImageGenerationBridgeInherit: 'Follow channel',
-        codexImageGenerationBridgeInheritDesc: 'Do not write an account override; use the channel or global policy.',
-        codexImageGenerationBridgeEnabled: 'Force on',
-        codexImageGenerationBridgeEnabledDesc: 'Allow image tool injection for Codex /responses requests.',
-        codexImageGenerationBridgeDisabled: 'Force off',
-        codexImageGenerationBridgeDisabledDesc: 'Block image tool injection for Codex /responses requests.',
-        codexImageGenerationBridgeBadgeInherit: 'Channel policy',
-        codexImageGenerationBridgeBadgeEnabled: 'Account on',
-        codexImageGenerationBridgeBadgeDisabled: 'Account off',
         compactMode: 'Compact mode',
         compactModeDesc:
           'Controls how this account participates in /responses/compact routing. Auto follows probe results, Force On always allows, Force Off always excludes.',
@@ -3180,8 +2993,7 @@ export default {
           'Only applies to /responses/compact. Use this when the upstream compact endpoint requires a special compact model.',
         compactSupported: 'Compact supported',
         compactUnsupported: 'Compact unsupported',
-        compactAuto: 'Compact Auto',
-        compactUnknown: 'Compact Auto',
+        compactUnknown: 'Compact unknown',
         compactLastChecked: 'Last compact probe',
         testMode: 'Test mode',
         testModeDefault: 'Default request',
@@ -3215,7 +3027,7 @@ export default {
       targetNoWildcard: 'Target model cannot contain wildcard *',
       searchModels: 'Search models...',
       noMatchingModels: 'No matching models',
-      fillRelatedModels: 'Sync latest supported models',
+      fillRelatedModels: 'Fill related models',
       clearAllModels: 'Clear all models',
       customModelName: 'Custom model name',
       enterCustomModelName: 'Enter custom model name',
@@ -3475,16 +3287,6 @@ export default {
           refreshTokenAuth: 'Manual RT Input',
           refreshTokenDesc: 'Enter your existing OpenAI Refresh Token(s). Supports batch input (one per line). The system will automatically validate and create accounts.',
           refreshTokenPlaceholder: 'Paste your OpenAI Refresh Token...\nSupports multiple, one per line',
-          codexSessionAuth: 'Codex JSON / AT Batch Input',
-          codexSessionDesc: 'Paste Codex JSON or an accessToken. Accounts use the step 1 settings.',
-          codexSessionInputLabel: 'Codex JSON or accessToken',
-          codexSessionPlaceholder: 'Multiple lines supported, one token or JSON per line',
-          codexSessionHint: 'sessionToken will not be saved as refresh_token. Without refresh_token, the account expires with the accessToken expiry; import is rejected if the expiry cannot be parsed and step 1 has no expiration.',
-          codexSessionImportAndCreate: 'Import & Create Account',
-          codexSessionEmpty: 'Please enter Codex JSON or accessToken',
-          codexSessionImportFailed: 'Failed to import Codex account',
-          codexSessionImportSuccess: 'Import completed: created {created}, updated {updated}, skipped {skipped}',
-          codexSessionImportPartial: 'Partial success: created {created}, updated {updated}, skipped {skipped}, failed {failed}',
           sessionTokenAuth: 'Manual ST Input',
           sessionTokenDesc: 'Enter your existing Session Token(s). Supports batch input (one per line). The system will automatically validate and create accounts.',
           sessionTokenPlaceholder: 'Paste your Session Token...\nSupports multiple, one per line',
@@ -5086,7 +4888,6 @@ export default {
       description: 'Manage registration, email verification, default values, and SMTP settings',
       tabs: {
         general: 'General',
-        agreement: 'Agreement',
         features: 'Feature Switches',
         security: 'Security',
         users: 'Users',
@@ -5111,13 +4912,6 @@ export default {
           configureLink: 'Configure model pricing in Channel Management > Channel Pricing',
           enabled: 'Enable Available Channels',
           enabledHint: 'When off, the sidebar entry is hidden and the endpoint returns an empty list.',
-        },
-        riskControl: {
-          title: 'Risk Control',
-          description: 'Enable the content moderation menu and gateway audit entry point. Disabled by default.',
-          configureLink: 'Configure content moderation in Risk Control',
-          enabled: 'Enable Risk Control',
-          enabledHint: 'When off, the admin sidebar entry is hidden and gateway moderation is skipped.',
         },
         affiliate: {
           title: 'Affiliate (Invite Rebate)',
@@ -5216,7 +5010,7 @@ export default {
         secretKeyConfiguredHint: 'Secret key configured. Leave empty to keep the current value.'      },
       linuxdo: {
         title: 'LinuxDo Connect Login',
-        description: 'Configure LinuxDo Connect OAuth for Sub2API end-user login',
+        description: 'Configure LinuxDo Connect OAuth for apia8 end-user login',
         enable: 'Enable LinuxDo Login',
         enableHint: 'Show LinuxDo login on the login/register pages',
         clientId: 'Client ID',
@@ -5377,10 +5171,10 @@ export default {
         backendModeDescription:
           'Disables user registration, public site, and self-service features. Only admin can log in and manage the platform.',
         siteName: 'Site Name',
-        siteNamePlaceholder: 'Sub2API',
+        siteNamePlaceholder: 'apia8',
         siteNameHint: 'Displayed in emails and page titles',
         siteSubtitle: 'Site Subtitle',
-        siteSubtitlePlaceholder: 'Subscription to API Conversion Platform',
+        siteSubtitlePlaceholder: 'AI API Gateway Platform',
         siteSubtitleHint: 'Displayed on login and register pages',
         apiBaseUrl: 'API Base URL',
         apiBaseUrlPlaceholder: 'https://api.example.com',
@@ -5514,7 +5308,6 @@ export default {
         providerAlipay: 'Alipay (Direct)',
         providerWxpay: 'WeChat Pay (Direct)',
         providerStripe: 'Stripe',
-        providerAirwallex: 'Airwallex',
         typeDisabled: 'type disabled',
         enableTypesFirst: 'Enable at least one payment type above first',
         easypayRedirect: 'Redirect',
@@ -5541,24 +5334,12 @@ export default {
         wxpayConfigHint: 'WeChat Pay usually only needs App ID. Fill MP App ID, H5 App Name, and H5 App URL only when your Official Account or H5 flow specifically requires them.',
         wxpayAdvancedOptions: 'WeChat Pay Advanced Options',
         field_secretKey: 'Secret Key',
-        field_clientId: 'Client ID',
-        field_apiKey: 'API Key',
         field_publishableKey: 'Publishable Key',
         field_webhookSecret: 'Webhook Secret',
-        field_countryCode: 'Country/region code',
-        field_currency: 'Payment currency',
-        field_accountId: 'Airwallex Account ID',
-        field_airwallexApiBaseHint: 'Must match the API key environment: use https://api-demo.airwallex.com/api/v1 for sandbox/demo keys, and https://api.airwallex.com/api/v1 for production keys. Mixed environments return credentials_invalid / Access Denied.',
-        field_paymentCurrencyHint: 'Default is CNY. Stripe and Airwallex can choose HKD, USD, or another listed currency supported by the account; WeChat Pay, Alipay, and EasyPay remain CNY.',
-        field_accountIdHint: 'Leave this empty unless you use multiple accounts, an organization-level key, or connected-account payments. A single-account scoped API key uses the selected account by default.',
         field_cid: 'Channel ID',
         field_cidAlipay: 'Alipay Channel ID',
         field_cidWxpay: 'WeChat Channel ID',
         stripeWebhookHint: 'Configure the following URL as a Webhook endpoint in Stripe Dashboard:',
-        stripeWebhookApiVersionHint: 'Set this Webhook endpoint API version to match the integrated Stripe SDK. Recommended: {version}. A mismatch can cause webhook parsing errors.',
-        airwallexWebhookHint: 'Configure the following URL as a Webhook endpoint in Airwallex. Select at least Payment Intent -> Succeeded (payment_intent.succeeded), preferably also Payment Intent -> Cancelled (payment_intent.cancelled). Use the account default or latest stable API version.',
-        airwallexGuideSummary: 'When creating an Airwallex scoped API key, select Read and Write for Payment Acceptance under account-level permissions.',
-        airwallexGuideNote: 'Do not grant unrelated permissions such as Spend, Payouts, Transfers, Funds Splits, or POS Terminals unless you explicitly need them. For webhooks, select at least payment_intent.succeeded, preferably also payment_intent.cancelled, and use the account default or latest stable API version.',
         limitsTitle: 'Limits',
         limitSingleMin: 'Min per order',
         limitSingleMax: 'Max per order',
@@ -5659,7 +5440,7 @@ export default {
         fromEmail: 'From Email',
         fromEmailPlaceholder: "noreply{'@'}example.com",
         fromName: 'From Name',
-        fromNamePlaceholder: 'Sub2API',
+        fromNamePlaceholder: 'apia8',
         useTls: 'Use TLS',
         useTlsHint: 'Enable TLS encryption for SMTP connection'
       },
@@ -6267,14 +6048,14 @@ export default {
     // Admin tour steps
     admin: {
       welcome: {
-        title: '👋 Welcome to Sub2API',
-        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Sub2API is a powerful AI service gateway platform that helps you easily manage and distribute AI services.</p><p style="margin-bottom: 12px;"><b>🎯 Core Features:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>Group Management</b> - Create service tiers (VIP, Free Trial, etc.)</li><li>🔗 <b>Account Pool</b> - Connect multiple upstream AI service accounts</li><li>🔑 <b>Key Distribution</b> - Generate independent API Keys for users</li><li>💰 <b>Billing Control</b> - Flexible rate and quota management</li></ul><p style="color: #10b981; font-weight: 600;">Let\'s complete the initial setup in 3 minutes →</p></div>',
+        title: '👋 Welcome to apia8',
+        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">apia8 is a powerful AI service gateway platform that helps you easily manage and distribute AI services.</p><p style="margin-bottom: 12px;"><b>🎯 Core Features:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>Group Management</b> - Create service tiers (VIP, Free Trial, etc.)</li><li>🔗 <b>Account Pool</b> - Connect multiple upstream AI service accounts</li><li>🔑 <b>Key Distribution</b> - Generate independent API Keys for users</li><li>💰 <b>Billing Control</b> - Flexible rate and quota management</li></ul><p style="color: #10b981; font-weight: 600;">Let\'s complete the initial setup in 3 minutes →</p></div>',
         nextBtn: 'Start Setup 🚀',
         prevBtn: 'Skip'
       },
       groupManage: {
         title: '📦 Step 1: Group Management',
-        description: '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>What is a Group?</b></p><p style="margin-bottom: 12px;">Groups are the core concept of Sub2API, like a "service package":</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 Each group can contain multiple upstream accounts</li><li>💰 Each group has independent billing multiplier</li><li>👥 Can be set as public or exclusive</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 Example:</b> You can create "VIP Premium" (high rate) and "Free Trial" (low rate) groups</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 Click "Group Management" on the left sidebar</p></div>'
+        description: '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>What is a Group?</b></p><p style="margin-bottom: 12px;">Groups are the core concept of apia8, like a "service package":</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 Each group can contain multiple upstream accounts</li><li>💰 Each group has independent billing multiplier</li><li>👥 Can be set as public or exclusive</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 Example:</b> You can create "VIP Premium" (high rate) and "Free Trial" (low rate) groups</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 Click "Group Management" on the left sidebar</p></div>'
       },
       createGroup: {
         title: '➕ Create New Group',
@@ -6367,8 +6148,8 @@ export default {
     // User tour steps
     user: {
       welcome: {
-        title: '👋 Welcome to Sub2API',
-        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Hello! Welcome to the Sub2API AI service platform.</p><p style="margin-bottom: 12px;"><b>🎯 Quick Start:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 Create API Key</li><li>📋 Copy key to your application</li><li>🚀 Start using AI services</li></ul><p style="color: #10b981; font-weight: 600;">Just 1 minute, let\'s get started →</p></div>',
+        title: '👋 Welcome to apia8',
+        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Hello! Welcome to the apia8 AI service platform.</p><p style="margin-bottom: 12px;"><b>🎯 Quick Start:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 Create API Key</li><li>📋 Copy key to your application</li><li>🚀 Start using AI services</li></ul><p style="color: #10b981; font-weight: 600;">Just 1 minute, let\'s get started →</p></div>',
         nextBtn: 'Start 🚀',
         prevBtn: 'Skip'
       },
@@ -6415,7 +6196,6 @@ export default {
       alipay: 'Alipay',
       wxpay: 'WeChat Pay',
       stripe: 'Stripe',
-      airwallex: 'Airwallex',
       card: 'Card',
       link: 'Link',
       alipay_direct: 'Alipay (Direct)',
@@ -6501,8 +6281,6 @@ export default {
     stripeLoadFailed: 'Failed to load payment component. Please refresh and try again.',
     stripeMissingParams: 'Missing order ID or client secret',
     stripeNotConfigured: 'Stripe is not configured',
-    airwallexLoadFailed: 'Failed to load Airwallex payment component. Please refresh and try again.',
-    airwallexMissingParams: 'Missing Airwallex payment parameters',
     errors: {
       tooManyPending: 'Too many pending orders (max {max}). Please complete or cancel existing orders first.',
       cancelRateLimited: 'Too many cancellations. Please try again later.',
@@ -6548,7 +6326,6 @@ export default {
       REFUND_AMOUNT_EXCEEDED: 'Refund amount exceeds the recharge amount.',
       REFUND_FAILED: 'Refund failed.',
     },
-    airwallexPay: 'Airwallex Payment',
     stripePay: 'Pay Now',
     stripeSuccessProcessing: 'Payment successful, processing your order...',
     stripePopup: {

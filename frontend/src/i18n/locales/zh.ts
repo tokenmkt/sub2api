@@ -9,89 +9,56 @@ export default {
     dashboard: '控制台',
     login: '登录',
     getStarted: '立即开始',
+    installGuide: '安装教程',
     goToDashboard: '进入控制台',
-    // 新增：面向用户的价值主张
-    heroSubtitle: '一个密钥，畅用多个 AI 模型',
-    heroDescription: '无需管理多个订阅账号，一站式接入 Claude、GPT、Gemini 等主流 AI 服务',
-    tags: {
-      subscriptionToApi: '订阅转 API',
-      stickySession: '会话保持',
-      realtimeBilling: '按量计费'
+    badge: '官方 API 接入',
+    heroTitle: '官方 AI API 网关',
+    heroSubtitle: '直连官方模型能力，交付稳定、纯正、可长期承载高流量的 API 接入层。',
+    heroDescription:
+      'apia8 面向正式业务场景，提供统一鉴权、智能路由、实时计费与健康切换，让上游能力以更稳的方式进入你的系统。',
+    heroSecondaryCta: '查看文档',
+    quickstart: {
+      label: '快速接入',
+      title: '接入方式几乎不变',
+      filename: 'quickstart.py',
+      comment: '# 只需替换 base_url，其余不变',
+      response: '你好！我是 apia8 官方 API 网关。'
     },
-    // 用户痛点区块
-    painPoints: {
-      title: '你是否也遇到这些问题？',
-      items: {
-        expensive: {
-          title: '订阅费用高',
-          desc: '每个 AI 服务都要单独订阅，每月支出越来越多'
-        },
-        complex: {
-          title: '多账号难管理',
-          desc: '不同平台的账号、密钥分散各处，管理起来很麻烦'
-        },
-        unstable: {
-          title: '服务不稳定',
-          desc: '单一账号容易触发限制，影响正常使用'
-        },
-        noControl: {
-          title: '用量无法控制',
-          desc: '不知道钱花在哪了，也无法限制团队成员的使用'
-        }
+    metrics: {
+      official: {
+        label: '官方 API',
+        value: '直连'
+      },
+      stability: {
+        label: '稳定路由',
+        value: '24/7'
+      },
+      purity: {
+        label: '纯正上游',
+        value: '原生'
       }
     },
-    // 解决方案区块
-    solutions: {
-      title: '我们帮你解决',
-      subtitle: '简单三步，开始省心使用 AI'
+    trust: {
+      title: '为高流量业务准备的接入层',
+      subtitle: '不只是能调用，而是让正式业务长期稳定地调用。'
     },
     features: {
-      unifiedGateway: '一键接入',
-      unifiedGatewayDesc: '获取一个 API 密钥，即可调用所有已接入的 AI 模型，无需分别申请。',
-      multiAccount: '稳定可靠',
-      multiAccountDesc: '智能调度多个上游账号，自动切换和负载均衡，告别频繁报错。',
-      balanceQuota: '用多少付多少',
-      balanceQuotaDesc: '按实际使用量计费，支持设置配额上限，团队用量一目了然。'
-    },
-    // 优势对比
-    comparison: {
-      title: '为什么选择我们？',
-      headers: {
-        feature: '对比项',
-        official: '官方订阅',
-        us: '本平台'
+      official: {
+        title: '官方 API 接入',
+        desc: '保持接口能力、鉴权方式与上游模型演进节奏同步。'
       },
-      items: {
-        pricing: {
-          feature: '付费方式',
-          official: '固定月费，用不完也付',
-          us: '按量付费，用多少付多少'
-        },
-        models: {
-          feature: '模型选择',
-          official: '单一服务商',
-          us: '多模型随意切换'
-        },
-        management: {
-          feature: '账号管理',
-          official: '每个服务单独管理',
-          us: '统一密钥，一站管理'
-        },
-        stability: {
-          feature: '服务稳定性',
-          official: '单账号易触发限制',
-          us: '多账号池，自动切换'
-        },
-        control: {
-          feature: '用量控制',
-          official: '无法限制',
-          us: '可设配额、查明细'
-        }
+      stability: {
+        title: '稳定承载高流量',
+        desc: '通过多节点路由、健康探测与自动切换降低抖动和中断。'
+      },
+      purity: {
+        title: '纯正模型输出链路',
+        desc: '减少非必要中间层干预，让返回结果更接近官方原始能力。'
       }
     },
     providers: {
-      title: '已支持的 AI 模型',
-      description: '一个 API，多种选择',
+      title: 'AI 模型',
+      description: '一个 API，连接主流官方模型',
       supported: '已支持',
       soon: '即将推出',
       claude: 'Claude',
@@ -99,14 +66,97 @@ export default {
       antigravity: 'Antigravity',
       more: '更多'
     },
-    // CTA 区块
     cta: {
-      title: '准备好开始了吗？',
-      description: '注册即可获得免费试用额度，体验一站式 AI 服务',
-      button: '免费注册'
+      title: '把官方 AI 能力稳定接进你的产品',
+      description: '注册后即可开始接入，适合面向生产环境的 API 调用场景。',
+      button: '立即接入'
     },
     footer: {
       allRightsReserved: '保留所有权利。'
+    }
+  },
+
+  installGuide: {
+    badge: '安装与配置',
+    title: '安装教程',
+    subtitle: '按照你常用的 AI CLI 工具选择对应配置，几分钟内接入 apia8 官方 API 网关。',
+    backHome: '返回首页',
+    overviewTitle: '安装流程',
+    stepPrefix: '步骤',
+    checklistTitle: '安装前准备',
+    optionalEyebrow: '可选配置',
+    optionalTitle: '补充配置',
+    copy: '复制',
+    copySuccess: '已复制到剪贴板',
+    tipsEyebrow: '使用建议',
+    tipsTitle: '接入时建议这样做',
+    labels: {
+      install: '安装',
+      config: '配置',
+      verify: '验证'
+    },
+    blockEyebrows: {
+      install: '安装命令',
+      config: '配置文件',
+      auth: '鉴权文件',
+      env: '环境变量',
+      ide: '编辑器配置',
+      verify: '验证命令'
+    },
+    tip1: '优先复制完整配置，不要只改部分环境变量，避免本地残留旧值。',
+    tip2: '如果你已经接过 OpenAI 兼容接口，通常只需要替换 Base URL 和 API Key。',
+    tip3: '接入完成后先跑一次最小命令确认链路畅通，再开始正式业务调用。',
+    codex: {
+      summaryTitle: 'Codex CLI 接入',
+      summary: '适合需要 OpenAI 兼容工作流的场景。按照配置文件和鉴权文件两步完成接入，之后直接用 `codex` 启动即可。',
+      installValue: '全局安装 Codex CLI',
+      configValue: '写入 ~/.codex/config.toml 与 auth.json',
+      verifyValue: '终端执行 codex 验证',
+      check1: '确保本机已安装 Node.js 18+。',
+      check2: '准备好 apia8 API Key，例如 sk-apia8-...。',
+      check3: '建议先备份已有 ~/.codex 配置，再覆盖为新的网关接入参数。',
+      installBlockTitle: '安装 Codex CLI',
+      installBlockDesc: '如果你尚未安装 Codex CLI，先执行一次全局安装。',
+      configBlockTitle: '写入 Codex 配置文件',
+      configBlockDesc: '将模型提供方切到 OpenAI，并把请求发到 apia8 网关。',
+      authBlockTitle: '写入 API Key',
+      authBlockDesc: '把你的 apia8 Key 放进 auth.json，CLI 会自动读取。',
+      verifyBlockTitle: '验证是否安装完成',
+      verifyBlockDesc: '执行后如果 CLI 可以正常启动并继续会话，就说明接入成功。'
+    },
+    claude: {
+      summaryTitle: 'Claude Code 接入',
+      summary: '适合使用 Claude Code 或 VSCode Claude Code 插件的场景。核心是把 Anthropic 相关环境变量切到 apia8 网关。',
+      installValue: '全局安装 Claude Code',
+      configValue: '设置 ANTHROPIC_BASE_URL 与 Token',
+      verifyValue: '终端执行 claude 验证',
+      check1: '确保本机已安装 Node.js，并能执行 npm 命令。',
+      check2: '准备好 apia8 API Key，并确认网关域名可访问。',
+      check3: '如果你同时在终端和 VSCode 使用 Claude Code，建议两边都写入同一组配置。',
+      installBlockTitle: '安装 Claude Code',
+      installBlockDesc: '先安装官方 CLI，再接入 apia8 网关。',
+      envBlockTitle: '配置终端环境变量',
+      envBlockDesc: '终端模式下最关键的是 Base URL、Token，以及关闭非必要流量。',
+      ideBlockTitle: '配置 VSCode Claude Code',
+      ideBlockDesc: '如果你在 VSCode 里使用 Claude Code，也可以直接在 settings.json 注入相同环境变量。',
+      verifyBlockTitle: '验证是否安装完成',
+      verifyBlockDesc: '执行后如果 Claude Code 能正常打开会话，即表示链路已经切到 apia8。'
+    },
+    gemini: {
+      summaryTitle: 'Gemini CLI 接入',
+      summary: '适合使用 Gemini CLI 的场景。配置方式最轻，只需要安装 CLI 并写入三项环境变量。',
+      installValue: '全局安装 Gemini CLI',
+      configValue: '设置 Google Gemini Base URL 与 Key',
+      verifyValue: '终端执行 gemini 验证',
+      check1: '确保本机已安装 Node.js 18+。',
+      check2: '准备好 apia8 API Key，并确认你的网络可以访问 apia8 网关。',
+      check3: '如果你本机已有旧的 Gemini 环境变量，建议先清掉再重新设置。',
+      installBlockTitle: '安装 Gemini CLI',
+      installBlockDesc: '先安装 CLI 工具本体，再接入 apia8 的 Gemini 网关地址。',
+      envBlockTitle: '配置 Gemini 环境变量',
+      envBlockDesc: '设置 Base URL、API Key 和默认模型后，CLI 就会走 apia8 通道。',
+      verifyBlockTitle: '验证是否安装完成',
+      verifyBlockDesc: '执行后若 Gemini CLI 能正常进入命令行会话，即表示接入成功。'
     }
   },
 
@@ -182,8 +232,8 @@ export default {
 
   // Setup Wizard
   setup: {
-    title: 'Sub2API 安装向导',
-    description: '配置您的 Sub2API 实例',
+    title: 'apia8 安装向导',
+    description: '配置您的 apia8 实例',
     database: {
       title: '数据库配置',
       description: '连接到您的 PostgreSQL 数据库',
@@ -382,7 +432,6 @@ export default {
     channelPricing: '渠道定价',
     channelMonitor: '渠道监控',
     channelStatus: '渠道状态',
-    riskControl: '风控中心',
   },
 
   // Auth
@@ -411,9 +460,6 @@ export default {
     passwordRequired: '请输入密码',
     passwordMinLength: '密码至少需要 6 个字符',
     loginFailed: '登录失败，请检查您的凭据后重试。',
-    errors: {
-      USER_NOT_ACTIVE: '账号已被禁用',
-    },
     registrationFailed: '注册失败，请重试。',
     emailSuffixNotAllowed: '该邮箱域名不在允许注册范围内。',
     emailSuffixNotAllowedWithAllowed: '该邮箱域名不被允许。可用域名：{suffixes}',
@@ -475,9 +521,6 @@ export default {
       completing: '正在完成注册...',
       completeRegistrationFailed: '注册失败，请检查邀请码后重试。'
     },
-    emailOAuth: {
-      signIn: '使用 {providerName} 登录'
-    },
     oidc: {
       signIn: '使用 {providerName} 登录',
       callbackTitle: '正在完成 {providerName} 登录',
@@ -536,8 +579,6 @@ export default {
     oauth: {
       callbackTitle: 'OAuth 回调',
       callbackHint: '按需将授权码和状态值复制回后台授权流程。',
-      invalidCallbackTitle: '无效的登录回调',
-      invalidCallbackHint: '当前页面缺少有效的授权结果，请返回登录页重新发起快捷登录。',
       code: '授权码',
       state: '状态',
       fullUrl: '完整URL'
@@ -2369,8 +2410,6 @@ export default {
         webSearchEmulation: 'Web Search 模拟',
         webSearchEmulationHint: '⚠️ 开启后该渠道下所有 Anthropic 分组的账号将自动拦截 web_search 请求，请谨慎操作',
         webSearchEmulationGlobalDisabled: '请先在系统设置 → 网关 → Web Search 模拟中启用全局开关',
-        codexImageGenerationBridge: 'Codex 图片生成桥接',
-        codexImageGenerationBridgeHint: '开启后，OpenAI 分组的 Codex /responses 文本请求可能会被自动注入 image_generation 工具。仅在路由账号支持图片生成时开启。',
         basicSettings: '基础设置',
         addPlatform: '添加平台',
         noPlatforms: '点击"添加平台"开始配置渠道',
@@ -2391,216 +2430,6 @@ export default {
         noGroupsInChannel: '上方平台标签页中未选择分组',
         unnamed: '未命名'
       }
-    },
-
-    riskControl: {
-      title: '风控中心',
-      description: '配置内容审计策略并查看审核记录',
-      loadFailed: '加载风控中心失败',
-      saveFailed: '保存内容审计配置失败',
-      logsFailed: '加载审核记录失败',
-      saved: '内容审计配置已保存',
-      refresh: '刷新',
-      config: '内容审计配置',
-      configHint: '调用 OpenAI Moderations 进行请求内容评分，命中阈值后按模式处理。',
-      openSettings: '内容审计设置',
-      settingsTitle: '内容审计设置',
-      refreshStatus: '刷新状态',
-      records: '审核记录',
-      recordsHint: '展示命中、拦截、异常和已采样记录。',
-      saveConfig: '保存内容审计配置',
-      statusFailed: '加载运行状态失败',
-      enabled: '开启内容审计',
-      enabledHint: '关闭后即使风控中心菜单启用，也不会审核网关请求。',
-      mode: '全局模式',
-      modePreBlock: '前置拦截',
-      modePreBlockDesc: '每次请求先同步审核最新用户输入，命中后立即拒绝请求。',
-      modeObserve: '仅观察',
-      modeObserveDesc: '请求直接放行，最新用户输入进入异步审核队列；命中后只记录、通知和按规则累计。',
-      modeOff: '关闭',
-      modeOffDesc: '不执行内容审计，也不会写入审核记录。',
-      baseUrl: 'OpenAI Base URL',
-      model: '模型名',
-      apiKey: 'OpenAI API Key',
-      apiKeys: 'OpenAI API Keys',
-      apiKeyCount: '{count} 个 Key',
-      apiKeyPlaceholder: '请输入 API Key',
-      apiKeysPlaceholder: '新增 API Key，每行一个；保存后会追加到已保存 Key',
-      apiKeysPlaceholderReplace: '覆盖保存 API Key，每行一个；保存后会替换全部已保存 Key',
-      apiKeysPlaceholderKeep: '新增 API Key，每行一个；保存后会追加到已保存 Key',
-      apiKeysHint: '当前已保存 {count} 个 Key；输入区只用于新增，保存时会增量追加并自动去重。',
-      apiKeysWriteMode: '写入方式',
-      apiKeysModeAppend: '增量添加',
-      apiKeysModeReplace: '覆盖保存',
-      apiKeysModeAppendHint: '默认模式：保存时追加输入区 Key，并保留已保存 Key。',
-      apiKeysModeReplaceHint: '覆盖模式：保存时用输入区 Key 替换全部已保存 Key。',
-      apiKeysReplaceWarning: '覆盖模式',
-      apiKeysReplaceNoInput: '覆盖保存至少需要输入 1 个 API Key',
-      apiKeyPlaceholderKeep: '留空保持不变',
-      apiKeyWillClear: '保存后清除已配置 Key',
-      apiKeyConfigured: '已配置',
-      apiKeyTemporary: '待保存',
-      apiKeyPendingDelete: '待删除',
-      apiKeyPendingDeleteCount: '待删除 {count} 个 Key',
-      deleteApiKey: '删除这个 Key',
-      undoDeleteApiKey: '撤销删除',
-      inputApiKeyCount: '输入区 {count} 个 Key',
-      storedApiKeyCount: '已保存 {count} 个 Key',
-      testInputApiKeys: '测试输入区 Key',
-      testStoredApiKeys: '测试已保存 Key',
-      testContentWithStoredApiKey: '用已保存 Key 试跑内容',
-      testingApiKeys: '测试中',
-      apiKeyTestNoInput: '请先输入需要测试的 OpenAI API Key',
-      apiKeyTestDone: 'Key 测试完成，共 {count} 个',
-      apiKeyTestFailed: '测试 OpenAI API Key 失败',
-      apiKeyHealth: 'Key 可用状态',
-      apiKeyFreezeRule: '400 不冻结；401/403 冻结 10 分钟；429/529 冻结 1 分钟；其他 HTTP 错误冻结 10 秒。',
-      apiKeyRows: '{count} 个 Key',
-      apiKeyRowsCollapsed: '已隐藏 {count} 个 Key',
-      apiKeyRowsExpanded: '正在显示全部 {count} 个 Key',
-      expandApiKeyRows: '展开',
-      collapseApiKeyRows: '收起',
-      apiKeyHealthEmpty: '暂无 Key 状态',
-      apiKeyHealthEmptyHint: '保存 Key 或测试输入区 Key 后会显示可用性。',
-      apiKeyStatusOk: '可用',
-      apiKeyStatusError: '异常',
-      apiKeyStatusFrozen: '冻结',
-      apiKeyStatusUnknown: '未测试',
-      apiKeyFailureCount: '失败 {count} 次',
-      apiKeyLatency: '{ms} ms',
-      apiKeyHTTPStatus: 'HTTP {status}',
-      apiKeyFrozenUntil: '冻结至 {time}',
-      apiKeyLastChecked: '检查于 {time}',
-      apiKeyNotTested: '尚未测试',
-      auditTestInput: '审计试跑输入',
-      auditTestInputHint: '可填写提示词并上传或粘贴图片；图片以 base64 发送，不会保存文件。',
-      auditTestPromptPlaceholder: '输入要测试的用户提示词；留空时仅测试 Key 可用性。',
-      auditTestImages: '测试图片',
-      auditTestImagesHint: '支持上传、拖拽或粘贴图片，最多 1 张，每张不超过 8MB。',
-      addAuditTestImage: '添加图片',
-      clearAuditTest: '清空试跑',
-      auditTestImageLimit: '最多只能添加 {count} 张测试图片',
-      auditTestImageTooLarge: '单张测试图片不能超过 8MB',
-      auditTestImageReadFailed: '读取测试图片失败',
-      auditTestResult: '审计试跑结果',
-      auditTestHighest: '最高分类 {category}，分数 {score}',
-      auditTestComposite: '综合评分',
-      auditTestFlagged: '命中阈值',
-      auditTestPassed: '未命中',
-      notConfigured: '未配置',
-      clearApiKey: '清除已保存 Key',
-      keepApiKey: '保留已保存 Key',
-      timeoutMs: 'HTTP 超时 (ms)',
-      retryCount: '失败重试次数',
-      sampleRate: '采样率',
-      recordNonHits: '记录未命中输入',
-      recordNonHitsHint: '开启后会记录抽样但未命中的请求摘要，摘要会先脱敏再入库。',
-      preHashCheck: '启用前置哈希比对',
-      preHashCheckHint: '异步审核命中过的输入哈希会被前置拦截；该拦截不发送邮件，也不累计封禁次数。',
-      flaggedHashCount: '当前哈希集合数量：{count} 个',
-      flaggedHashHint: '哈希永久保存在 Redis 集合中；可粘贴完整 64 位哈希删除误拦截项，或一键清空全部风险哈希。',
-      flaggedHashPlaceholder: '粘贴完整 64 位输入哈希',
-      deleteFlaggedHash: '删除指定哈希',
-      clearFlaggedHashes: '一键清空',
-      clearFlaggedHashesConfirm: '确定要清空全部风险输入哈希吗？此操作不会删除审核记录，但会取消所有历史哈希拦截。',
-      flaggedHashDeleted: '风险哈希已删除',
-      flaggedHashNotFound: '该风险哈希不存在',
-      flaggedHashDeleteFailed: '删除风险哈希失败',
-      flaggedHashesCleared: '已清空 {count} 个风险哈希',
-      flaggedHashesClearFailed: '清空风险哈希失败',
-      workerCount: 'Worker 数',
-      queueSize: '异步队列大小',
-      blockStatus: '拦截 HTTP 状态码',
-      blockMessage: '自定义拦截提示',
-      emailOnHit: '命中后发送邮件',
-      emailOnHitHint: '开启后每次达到阈值都会向用户发送风控提醒邮件；自动封禁通知始终发送。',
-      autoBan: '自动封禁用户',
-      autoBanHint: '命中次数达到阈值后将禁用用户账号、刷新认证缓存并发送封禁通知邮件。',
-      banThreshold: '封禁触发次数',
-      violationWindowHours: '累计窗口（小时）',
-      hitRetentionDays: '命中记录保留（天）',
-      nonHitRetentionDays: '未命中记录保留（天，最多 3 天）',
-      violationCount: '{count} 次',
-      emailSent: '已发邮件',
-      emailNotSent: '未发邮件',
-      autoBanned: '已封禁',
-      unbanUser: '解封',
-      unbanSuccess: '用户已解封',
-      unbanFailed: '解封用户失败',
-      inputDetailTitle: '输入摘要详情',
-      inputDetailContent: '完整内容',
-      queueDelay: '排队 {ms} ms',
-      allGroups: '全部分组',
-      allGroupsHint: '当前审计全部分组',
-      selectedGroupsHint: '当前审计指定分组',
-      groupScope: '审计分组',
-      groupScopeHint: '开启右侧开关表示全部分组，关闭后选择指定分组。',
-      selectedGroups: '指定分组',
-      searchGroups: '搜索分组名称或平台',
-      noGroups: '暂无可用分组',
-      emptyLogs: '暂无审核记录',
-      workerStatus: 'Worker 运行状态',
-      workerStatusHint: '异步观察任务的队列和 worker 池状态。',
-      workerPool: 'Worker 池',
-      workerPoolMeta: '{active} 个处理中，{idle} 个空闲可用，共 {total} 个',
-      queueUsage: '队列占用',
-      activeWorkers: '处理中',
-      idleWorkers: '空闲可用',
-      workerActive: '正在处理异步审计任务',
-      workerIdle: '已启动，当前空闲可用',
-      workerDisabled: '风控或内容审计未启用',
-      processed: '已处理',
-      droppedErrors: '丢弃/异常',
-      autoRefresh: '每 15 秒自动刷新',
-      lastCleanup: '上次清理：{time}',
-      cleanupStats: '上次清理删除命中 {hit} 条，未命中 {nonHit} 条',
-      riskSwitchOff: '系统开关关闭',
-      tabs: {
-        basic: '基础',
-        scope: '审计范围',
-        runtime: '运行队列',
-        response: '命中通知',
-        retention: '日志保留',
-      },
-      overview: {
-        status: '运行状态',
-        enabled: '已启用',
-        disabled: '未启用',
-        apiKey: 'API Key',
-        groupScope: '审计范围',
-        logs: '审核记录',
-        currentFilter: '当前筛选结果',
-      },
-      filters: {
-        search: '按用户/Key/摘要搜索',
-        from: '开始时间',
-        to: '结束时间',
-        allGroups: '全部分组',
-        allEndpoints: '全部端点',
-      },
-      table: {
-        time: '时间',
-        group: '分组',
-        user: '用户',
-        apiKey: 'API Key',
-        endpoint: '端点',
-        result: '结果',
-        highest: '最高分',
-        actionMeta: '处置',
-        latency: '上游耗时',
-        input: '输入摘要',
-      },
-      result: {
-        all: '全部结果',
-        hit: '命中',
-        blocked: '已拦截',
-        pass: '未命中',
-        error: '异常',
-      },
-      action: {
-        block: '拦截',
-        error: '异常',
-      },
     },
 
     // Channel Monitor
@@ -2853,11 +2682,6 @@ export default {
       dataExportSelected: '导出选中',
       dataExportIncludeProxies: '导出代理（导出账号关联的代理）',
       dataImport: '导入',
-      moreActions: '更多操作',
-      dataActions: '数据操作',
-      toolActions: '工具',
-      viewColumns: '列显示',
-      selectedCount: '已选 {count}',
       dataExportConfirmMessage: '导出的数据包含账号与代理的敏感信息，请妥善保存。',
       dataExportConfirm: '确认导出',
       dataExported: '数据导出成功',
@@ -3302,18 +3126,6 @@ export default {
         responsesWebsocketsV2PassthroughHint: '当前已开启自动透传：仅影响 HTTP 透传链路，不影响 WS mode。',
         codexCLIOnly: '仅允许 Codex 官方客户端',
         codexCLIOnlyDesc: '仅对 OpenAI OAuth 生效。开启后仅允许 Codex 官方客户端家族访问；关闭后完全绕过并保持原逻辑。',
-        codexImageGenerationBridge: 'Codex 图片生成桥接',
-        codexImageGenerationBridgeDesc:
-          '账号级策略优先于渠道和全局配置。仅控制 Codex 走 /responses 文本端点时是否注入 image_generation 工具；不影响独立图片生成接口。',
-        codexImageGenerationBridgeInherit: '跟随渠道',
-        codexImageGenerationBridgeInheritDesc: '不写入账号覆盖，继续使用渠道或全局策略。',
-        codexImageGenerationBridgeEnabled: '强制开启',
-        codexImageGenerationBridgeEnabledDesc: '允许 Codex /responses 请求获得图片工具注入。',
-        codexImageGenerationBridgeDisabled: '强制关闭',
-        codexImageGenerationBridgeDisabledDesc: '阻断 Codex /responses 的图片工具注入。',
-        codexImageGenerationBridgeBadgeInherit: '渠道策略',
-        codexImageGenerationBridgeBadgeEnabled: '账号开启',
-        codexImageGenerationBridgeBadgeDisabled: '账号关闭',
         compactMode: 'Compact 模式',
         compactModeDesc:
           '控制本账号在 /responses/compact 调度中的参与方式。Auto 跟随探测结果，Force On 强制允许，Force Off 强制排除。',
@@ -3325,8 +3137,7 @@ export default {
           '仅在 /responses/compact 请求中生效。当上游 compact 端点需要特殊 compact 模型时使用。',
         compactSupported: '支持 Compact',
         compactUnsupported: '不支持 Compact',
-        compactAuto: 'Compact Auto',
-        compactUnknown: 'Compact Auto',
+        compactUnknown: 'Compact 未知',
         compactLastChecked: '最近探测',
         testMode: '测试模式',
         testModeDefault: '常规请求',
@@ -3359,7 +3170,7 @@ export default {
       targetNoWildcard: '目标模型不能包含通配符 *',
       searchModels: '搜索模型...',
       noMatchingModels: '没有匹配的模型',
-      fillRelatedModels: '同步最新支持模型',
+      fillRelatedModels: '填入相关模型',
       clearAllModels: '清除所有模型',
       customModelName: '自定义模型名称',
       enterCustomModelName: '输入自定义模型名称',
@@ -3610,16 +3421,6 @@ export default {
           refreshTokenAuth: '手动输入 RT',
           refreshTokenDesc: '输入您已有的 OpenAI Refresh Token，支持批量输入（每行一个），系统将自动验证并创建账号。',
           refreshTokenPlaceholder: '粘贴您的 OpenAI Refresh Token...\n支持多个，每行一个',
-          codexSessionAuth: 'Codex JSON / AT 批量输入',
-          codexSessionDesc: '粘贴 Codex JSON 或 accessToken，按第一步配置创建账号。',
-          codexSessionInputLabel: 'Codex JSON 或 accessToken',
-          codexSessionPlaceholder: '支持多行，每行一个 token 或 JSON',
-          codexSessionHint: 'sessionToken 不会作为 refresh_token 保存；未包含 refresh_token 时会按 accessToken 过期时间设置账号过期，无法解析且第一步未设置过期时间时会拒绝导入。',
-          codexSessionImportAndCreate: '导入并创建账号',
-          codexSessionEmpty: '请输入 Codex JSON 或 accessToken',
-          codexSessionImportFailed: 'Codex 账号导入失败',
-          codexSessionImportSuccess: '导入完成：新增 {created}，更新 {updated}，跳过 {skipped}',
-          codexSessionImportPartial: '部分成功：新增 {created}，更新 {updated}，跳过 {skipped}，失败 {failed}',
           sessionTokenAuth: '手动输入 ST',
           sessionTokenDesc: '输入您已有的 Session Token，支持批量输入（每行一个），系统将自动验证并创建账号。',
           sessionTokenPlaceholder: '粘贴您的 Session Token...\n支持多个，每行一个',
@@ -5249,7 +5050,6 @@ export default {
       description: '管理注册、邮箱验证、默认值和 SMTP 设置',
       tabs: {
         general: '通用设置',
-        agreement: '登录条款',
         features: '功能开关',
         security: '安全与认证',
         users: '用户默认值',
@@ -5274,13 +5074,6 @@ export default {
           configureLink: '前往 渠道管理 > 渠道定价 配置模型价格',
           enabled: '启用可用渠道',
           enabledHint: '关闭后用户端侧边栏入口隐藏，接口返回空数组。',
-        },
-        riskControl: {
-          title: '风控中心',
-          description: '启用内容审计菜单和全端点请求审核入口。默认关闭。',
-          configureLink: '前往 风控中心 配置内容审计',
-          enabled: '启用风控中心',
-          enabledHint: '关闭后管理员侧边栏入口隐藏，网关内容审计不会执行。',
         },
         affiliate: {
           title: '邀请返利',
@@ -5380,7 +5173,7 @@ export default {
       },
       linuxdo: {
         title: 'LinuxDo Connect 登录',
-        description: '配置 LinuxDo Connect OAuth，用于 Sub2API 用户登录',
+        description: '配置 LinuxDo Connect OAuth，用于 apia8 用户登录',
         enable: '启用 LinuxDo 登录',
         enableHint: '在登录/注册页面显示 LinuxDo 登录入口',
         clientId: 'Client ID',
@@ -5537,7 +5330,7 @@ export default {
           '禁用用户注册、公开页面和自助服务功能。仅管理员可以登录和管理平台。',
         siteName: '站点名称',
         siteNameHint: '显示在邮件和页面标题中',
-        siteNamePlaceholder: 'Sub2API',
+        siteNamePlaceholder: 'apia8',
         siteSubtitle: '站点副标题',
         siteSubtitleHint: '显示在登录和注册页面',
         siteSubtitlePlaceholder: '订阅转 API 转换平台',
@@ -5675,7 +5468,6 @@ export default {
         providerAlipay: '支付宝官方',
         providerWxpay: '微信官方',
         providerStripe: 'Stripe',
-        providerAirwallex: 'Airwallex',
         typeDisabled: '类型已禁用',
         enableTypesFirst: '请先在上方启用至少一种服务商',
         easypayRedirect: '跳转',
@@ -5702,24 +5494,12 @@ export default {
         wxpayConfigHint: '微信支付通常只需要填写 App ID。公众号 App ID、H5 应用名称、H5 应用地址仅在公众号支付或 H5 场景有特殊要求时再填写。',
         wxpayAdvancedOptions: '微信支付高级可选项',
         field_secretKey: '密钥',
-        field_clientId: 'Client ID',
-        field_apiKey: 'API Key',
         field_publishableKey: '公开密钥',
         field_webhookSecret: 'Webhook 密钥',
-        field_countryCode: '国家/地区代码',
-        field_currency: '支付币种',
-        field_accountId: 'Airwallex 账户 ID',
-        field_airwallexApiBaseHint: '必须和 API Key 所属环境一致：沙箱/测试密钥使用 https://api-demo.airwallex.com/api/v1，生产密钥使用 https://api.airwallex.com/api/v1。环境混用会返回 credentials_invalid / Access Denied。',
-        field_paymentCurrencyHint: '默认 CNY。Stripe 和 Airwallex 可按账户支持从下拉项选择 HKD、USD 等币种；微信、支付宝、易支付仍按 CNY。',
-        field_accountIdHint: '不涉及多账户、组织级密钥或连接账户收款时可以不填；单账户 Scoped API Key 会默认使用所选账户。',
         field_cid: '支付渠道 ID',
         field_cidAlipay: '支付宝渠道 ID',
         field_cidWxpay: '微信渠道 ID',
         stripeWebhookHint: '请在 Stripe Dashboard 中将以下地址配置为 Webhook 端点：',
-        stripeWebhookApiVersionHint: 'Webhook 端点的 API 版本请与当前集成的 Stripe SDK 对齐，建议选择 {version}；版本不一致可能导致回调事件解析失败。',
-        airwallexWebhookHint: '请在 Airwallex 后台将以下地址配置为 Webhook 端点；事件至少选择 Payment Intent -> Succeeded（payment_intent.succeeded），建议同时选择 Payment Intent -> Cancelled（payment_intent.cancelled）；API version 选择账户默认或最新稳定版本。',
-        airwallexGuideSummary: '创建 Airwallex Scoped API 密钥时，建议只在账户级权限中为 Payment Acceptance 勾选读取和写入。',
-        airwallexGuideNote: '不需要勾选 Spend、Payouts、Transfers、Funds Splits、POS 终端等与在线收款无关的权限。Webhook 事件至少选择 payment_intent.succeeded，建议同时选择 payment_intent.cancelled；API version 选择账户默认或最新稳定版本。',
         limitsTitle: '限额配置',
         limitSingleMin: '单笔最低',
         limitSingleMax: '单笔最高',
@@ -5820,7 +5600,7 @@ export default {
         fromEmail: '发件人邮箱',
         fromEmailPlaceholder: "noreply{'@'}example.com",
         fromName: '发件人名称',
-        fromNamePlaceholder: 'Sub2API',
+        fromNamePlaceholder: 'apia8',
         useTls: '使用 TLS',
         useTlsHint: '为 SMTP 连接启用 TLS 加密'
       },
@@ -6425,16 +6205,16 @@ export default {
     // Admin tour steps
     admin: {
       welcome: {
-        title: '👋 欢迎使用 Sub2API',
+        title: '👋 欢迎使用 apia8',
         description:
-          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Sub2API 是一个强大的 AI 服务中转平台，让您轻松管理和分发 AI 服务。</p><p style="margin-bottom: 12px;"><b>🎯 核心功能：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>分组管理</b> - 创建不同的服务套餐（VIP、免费试用等）</li><li>🔗 <b>账号池</b> - 连接多个上游 AI 服务商账号</li><li>🔑 <b>密钥分发</b> - 为用户生成独立的 API Key</li><li>💰 <b>计费管理</b> - 灵活的费率和配额控制</li></ul><p style="color: #10b981; font-weight: 600;">接下来，我们将用 3 分钟带您完成首次配置 →</p></div>',
+          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">apia8 是一个强大的 AI 服务中转平台，让您轻松管理和分发 AI 服务。</p><p style="margin-bottom: 12px;"><b>🎯 核心功能：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>分组管理</b> - 创建不同的服务套餐（VIP、免费试用等）</li><li>🔗 <b>账号池</b> - 连接多个上游 AI 服务商账号</li><li>🔑 <b>密钥分发</b> - 为用户生成独立的 API Key</li><li>💰 <b>计费管理</b> - 灵活的费率和配额控制</li></ul><p style="color: #10b981; font-weight: 600;">接下来，我们将用 3 分钟带您完成首次配置 →</p></div>',
         nextBtn: '开始配置 🚀',
         prevBtn: '跳过'
       },
       groupManage: {
         title: '📦 第一步：分组管理',
         description:
-          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>什么是分组？</b></p><p style="margin-bottom: 12px;">分组是 Sub2API 的核心概念，它就像一个"服务套餐"：</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 每个分组可以包含多个上游账号</li><li>💰 每个分组有独立的计费倍率</li><li>👥 可以设置为公开或专属分组</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 示例：</b>您可以创建"VIP专线"（高倍率）和"免费试用"（低倍率）两个分组</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 点击左侧的"分组管理"开始</p></div>'
+          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>什么是分组？</b></p><p style="margin-bottom: 12px;">分组是 apia8 的核心概念，它就像一个"服务套餐"：</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 每个分组可以包含多个上游账号</li><li>💰 每个分组有独立的计费倍率</li><li>👥 可以设置为公开或专属分组</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 示例：</b>您可以创建"VIP专线"（高倍率）和"免费试用"（低倍率）两个分组</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 点击左侧的"分组管理"开始</p></div>'
       },
       createGroup: {
         title: '➕ 创建新分组',
@@ -6546,9 +6326,9 @@ export default {
     // User tour steps
     user: {
       welcome: {
-        title: '👋 欢迎使用 Sub2API',
+        title: '👋 欢迎使用 apia8',
         description:
-          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">您好！欢迎来到 Sub2API AI 服务平台。</p><p style="margin-bottom: 12px;"><b>🎯 快速开始：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 创建 API 密钥</li><li>📋 复制密钥到您的应用</li><li>🚀 开始使用 AI 服务</li></ul><p style="color: #10b981; font-weight: 600;">只需 1 分钟，让我们开始吧 →</p></div>',
+          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">您好！欢迎来到 apia8 AI 服务平台。</p><p style="margin-bottom: 12px;"><b>🎯 快速开始：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 创建 API 密钥</li><li>📋 复制密钥到您的应用</li><li>🚀 开始使用 AI 服务</li></ul><p style="color: #10b981; font-weight: 600;">只需 1 分钟，让我们开始吧 →</p></div>',
         nextBtn: '开始 🚀',
         prevBtn: '跳过'
       },
@@ -6600,7 +6380,6 @@ export default {
       alipay: '支付宝',
       wxpay: '微信支付',
       stripe: 'Stripe',
-      airwallex: 'Airwallex',
       card: '银行卡',
       link: 'Link',
       alipay_direct: '支付宝（直连）',
@@ -6686,8 +6465,6 @@ export default {
     stripeLoadFailed: '支付组件加载失败，请刷新页面重试',
     stripeMissingParams: '缺少订单ID或支付密钥',
     stripeNotConfigured: 'Stripe 未配置',
-    airwallexLoadFailed: 'Airwallex 支付组件加载失败，请刷新页面重试',
-    airwallexMissingParams: '缺少 Airwallex 支付参数',
     errors: {
       tooManyPending: '待支付订单过多（最多 {max} 个），请先完成或取消现有订单',
       cancelRateLimited: '取消订单过于频繁，请稍后再试',
@@ -6733,7 +6510,6 @@ export default {
       REFUND_AMOUNT_EXCEEDED: '退款金额超过充值金额',
       REFUND_FAILED: '退款失败',
     },
-    airwallexPay: 'Airwallex 支付',
     stripePay: '立即支付',
     stripeSuccessProcessing: '支付成功，正在处理订单...',
     stripePopup: {
