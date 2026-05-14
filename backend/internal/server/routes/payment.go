@@ -28,6 +28,7 @@ func RegisterPaymentRoutes(
 		authenticated.GET("/config", paymentHandler.GetPaymentConfig)
 		authenticated.GET("/checkout-info", paymentHandler.GetCheckoutInfo)
 		authenticated.GET("/plans", paymentHandler.GetPlans)
+		authenticated.GET("/recharge-plans", paymentHandler.GetRechargePlans)
 		authenticated.GET("/channels", paymentHandler.GetChannels)
 		authenticated.GET("/limits", paymentHandler.GetLimits)
 
@@ -92,6 +93,14 @@ func RegisterPaymentRoutes(
 			plans.POST("", adminPaymentHandler.CreatePlan)
 			plans.PUT("/:id", adminPaymentHandler.UpdatePlan)
 			plans.DELETE("/:id", adminPaymentHandler.DeletePlan)
+		}
+
+		rechargePlans := adminGroup.Group("/recharge-plans")
+		{
+			rechargePlans.GET("", adminPaymentHandler.ListRechargePlans)
+			rechargePlans.POST("", adminPaymentHandler.CreateRechargePlan)
+			rechargePlans.PUT("/:id", adminPaymentHandler.UpdateRechargePlan)
+			rechargePlans.DELETE("/:id", adminPaymentHandler.DeleteRechargePlan)
 		}
 
 		// Provider Instances
