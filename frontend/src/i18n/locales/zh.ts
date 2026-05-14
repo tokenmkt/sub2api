@@ -4707,7 +4707,7 @@ export default {
       },
       alertRules: {
         title: '告警规则',
-        description: '创建与管理系统阈值告警（仅邮件通知）',
+        description: '创建与管理系统阈值告警和通知渠道',
         loading: '加载中...',
         empty: '暂无告警规则',
         loadFailed: '加载告警规则失败',
@@ -4786,7 +4786,8 @@ export default {
           sustained: '连续样本数（每分钟）',
           cooldown: '冷却期（分钟）',
           enabled: '启用',
-          notifyEmail: '发送邮件通知'
+          notifyEmail: '发送邮件通知',
+          notifyFeishu: '发送飞书通知'
         },
         validation: {
           title: '请先修正以下问题',

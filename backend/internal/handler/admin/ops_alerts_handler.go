@@ -72,15 +72,17 @@ type opsAlertRuleValidatedInput struct {
 	SustainedMinutes int
 	CooldownMinutes  int
 
-	Enabled     bool
-	NotifyEmail bool
+	Enabled      bool
+	NotifyEmail  bool
+	NotifyFeishu bool
 
-	WindowProvided    bool
-	SustainedProvided bool
-	CooldownProvided  bool
-	SeverityProvided  bool
-	EnabledProvided   bool
-	NotifyProvided    bool
+	WindowProvided       bool
+	SustainedProvided    bool
+	CooldownProvided     bool
+	SeverityProvided     bool
+	EnabledProvided      bool
+	NotifyEmailProvided  bool
+	NotifyFeishuProvided bool
 }
 
 func isPercentOrRateMetric(metricType string) bool {
@@ -185,12 +187,21 @@ func validateOpsAlertRulePayload(raw map[string]json.RawMessage) (*opsAlertRuleV
 	}
 
 	if v, ok := raw["notify_email"]; ok {
-		validated.NotifyProvided = true
+		validated.NotifyEmailProvided = true
 		if err := json.Unmarshal(v, &validated.NotifyEmail); err != nil {
 			return nil, fmt.Errorf("notify_email must be a boolean")
 		}
 	} else {
 		validated.NotifyEmail = true
+	}
+
+	if v, ok := raw["notify_feishu"]; ok {
+		validated.NotifyFeishuProvided = true
+		if err := json.Unmarshal(v, &validated.NotifyFeishu); err != nil {
+			return nil, fmt.Errorf("notify_feishu must be a boolean")
+		}
+	} else {
+		validated.NotifyFeishu = true
 	}
 
 	if v, ok := raw["window_minutes"]; ok {
@@ -293,6 +304,7 @@ func (h *OpsHandler) CreateAlertRule(c *gin.Context) {
 	rule.Severity = validated.Severity
 	rule.Enabled = validated.Enabled
 	rule.NotifyEmail = validated.NotifyEmail
+	rule.NotifyFeishu = validated.NotifyFeishu
 
 	created, err := h.opsService.CreateAlertRule(c.Request.Context(), &rule)
 	if err != nil {
@@ -348,6 +360,7 @@ func (h *OpsHandler) UpdateAlertRule(c *gin.Context) {
 	rule.Severity = validated.Severity
 	rule.Enabled = validated.Enabled
 	rule.NotifyEmail = validated.NotifyEmail
+	rule.NotifyFeishu = validated.NotifyFeishu
 
 	updated, err := h.opsService.UpdateAlertRule(c.Request.Context(), &rule)
 	if err != nil {

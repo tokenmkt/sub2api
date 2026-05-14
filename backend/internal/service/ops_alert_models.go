@@ -29,7 +29,8 @@ type OpsAlertRule struct {
 	SustainedMinutes int `json:"sustained_minutes"`
 	CooldownMinutes  int `json:"cooldown_minutes"`
 
-	NotifyEmail bool `json:"notify_email"`
+	NotifyEmail  bool `json:"notify_email"`
+	NotifyFeishu bool `json:"notify_feishu"`
 
 	Filters map[string]any `json:"filters,omitempty"`
 
