@@ -203,6 +203,14 @@ func TestOpsAlertRuleValidation(t *testing.T) {
 	validated, err := validateOpsAlertRulePayload(raw)
 	require.NoError(t, err)
 	require.Equal(t, "High error rate", validated.Name)
+	require.True(t, validated.NotifyFeishu)
+
+	raw["notify_email"] = json.RawMessage(`false`)
+	raw["notify_feishu"] = json.RawMessage(`false`)
+	validated, err = validateOpsAlertRulePayload(raw)
+	require.NoError(t, err)
+	require.False(t, validated.NotifyEmail)
+	require.False(t, validated.NotifyFeishu)
 
 	_, err = validateOpsAlertRulePayload(map[string]json.RawMessage{})
 	require.Error(t, err)

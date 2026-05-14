@@ -649,7 +649,7 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 	if event.EmailSent {
 		return false
 	}
-	if !rule.NotifyEmail {
+	if !rule.NotifyEmail && !rule.NotifyFeishu {
 		return false
 	}
 
@@ -675,7 +675,7 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 	body := buildOpsAlertEmailBody(rule, event)
 
 	anySent := false
-	if emailCfg.Alert.Enabled && s.emailService != nil && len(emailCfg.Alert.Recipients) > 0 {
+	if rule.NotifyEmail && emailCfg.Alert.Enabled && s.emailService != nil && len(emailCfg.Alert.Recipients) > 0 {
 		for _, to := range emailCfg.Alert.Recipients {
 			addr := strings.TrimSpace(to)
 			if addr == "" {
@@ -692,7 +692,7 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 		}
 	}
 
-	if emailCfg.Feishu.Alert.Enabled {
+	if rule.NotifyFeishu && emailCfg.Feishu.Alert.Enabled {
 		text := buildOpsAlertFeishuText(rule, event)
 		cardContext := &OpsFeishuAlertCardContext{
 			EventID: event.ID,
