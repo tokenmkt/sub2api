@@ -124,18 +124,14 @@ func TestSendFeishuWebhookNotification_PostsInteractiveCardPayload(t *testing.T)
 	if !ok {
 		t.Fatalf("first card element = %#v, want object", elements[0])
 	}
-	if got := contentElement["tag"]; got != "div" {
-		t.Fatalf("first card element tag = %#v, want div so Feishu renders lark_md text", got)
+	if got := contentElement["tag"]; got != "markdown" {
+		t.Fatalf("first card element tag = %#v, want markdown so Feishu renders card body", got)
 	}
-	textElement, ok := contentElement["text"].(map[string]any)
-	if !ok {
-		t.Fatalf("first card element text = %#v, want object", contentElement["text"])
+	if _, exists := contentElement["text"]; exists {
+		t.Fatalf("first card markdown element has text field, want content field only: %#v", contentElement)
 	}
-	if got := textElement["tag"]; got != "lark_md" {
-		t.Fatalf("first card text tag = %#v, want lark_md", got)
-	}
-	if got := textElement["content"]; got != "service unavailable" {
-		t.Fatalf("first card text content = %#v, want service unavailable", got)
+	if got := contentElement["content"]; got != "service unavailable" {
+		t.Fatalf("first card markdown content = %#v, want service unavailable", got)
 	}
 }
 
