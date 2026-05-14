@@ -4546,7 +4546,7 @@ export default {
       },
       alertRules: {
         title: 'Alert Rules',
-        description: 'Create and manage threshold-based system alerts (email-only)',
+        description: 'Create and manage threshold-based system alerts and notification channels',
         loading: 'Loading...',
         empty: 'No alert rules',
         loadFailed: 'Failed to load alert rules',
@@ -4625,7 +4625,8 @@ export default {
           sustained: 'Sustained (samples)',
           cooldown: 'Cooldown (minutes)',
           enabled: 'Enabled',
-          notifyEmail: 'Send email notifications'
+          notifyEmail: 'Send email notifications',
+          notifyFeishu: 'Send Feishu notifications'
         },
         validation: {
           title: 'Please fix the following issues',

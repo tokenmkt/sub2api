@@ -757,6 +757,7 @@ export interface AlertRule {
   severity: OpsSeverity
   cooldown_minutes: number
   notify_email: boolean
+  notify_feishu: boolean
   filters?: Record<string, any>
   created_at?: string
   updated_at?: string
