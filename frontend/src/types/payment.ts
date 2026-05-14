@@ -62,6 +62,7 @@ export interface CheckoutInfoResponse {
   global_min: number
   global_max: number
   plans: SubscriptionPlan[]
+  recharge_plans: RechargePlan[]
   balance_disabled: boolean
   balance_recharge_multiplier: number
   recharge_fee_rate: number
@@ -117,6 +118,22 @@ export interface SubscriptionPlan {
   features: string[]
   for_sale: boolean
   sort_order: number
+}
+
+export interface RechargePlan {
+  id: number
+  name: string
+  description: string
+  price: number
+  credit_amount: number
+  original_price?: number
+  features: string[]
+  purchase_url: string
+  badge: string
+  for_sale: boolean
+  sort_order: number
+  created_at?: string
+  updated_at?: string
 }
 
 export interface PaymentChannel {

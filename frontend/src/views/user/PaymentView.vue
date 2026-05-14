@@ -39,7 +39,57 @@
             <div v-if="enabledMethods.length === 0" class="card py-16 text-center">
               <p class="text-gray-500 dark:text-gray-400">{{ t('payment.notAvailable') }}</p>
             </div>
-            <template v-else>
+            <template v-if="checkout.recharge_plans.length > 0">
+              <div :class="rechargePlanGridClass">
+                <div
+                  v-for="plan in checkout.recharge_plans"
+                  :key="plan.id"
+                  class="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-dark-700 dark:bg-dark-800"
+                >
+                  <div class="h-1 bg-primary-500" />
+                  <div class="flex flex-1 flex-col p-4">
+                    <div class="mb-3 flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                          <h3 class="truncate text-base font-bold text-gray-900 dark:text-white">{{ plan.name }}</h3>
+                          <span v-if="plan.badge" class="shrink-0 rounded-full bg-primary-50 px-2 py-0.5 text-[11px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-300">{{ plan.badge }}</span>
+                        </div>
+                        <p v-if="plan.description" class="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">{{ plan.description }}</p>
+                      </div>
+                      <div class="shrink-0 text-right">
+                        <div class="flex items-baseline justify-end gap-1">
+                          <span class="text-xs text-gray-400">¥</span>
+                          <span class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ plan.price }}</span>
+                        </div>
+                        <div v-if="plan.original_price" class="text-xs text-gray-400 line-through">¥{{ plan.original_price }}</div>
+                      </div>
+                    </div>
+                    <div class="mb-3 rounded-lg bg-gray-50 px-3 py-2 text-sm dark:bg-dark-700/50">
+                      <div class="flex items-center justify-between">
+                        <span class="text-gray-500 dark:text-gray-400">{{ t('payment.creditedBalance') }}</span>
+                        <span class="font-semibold text-green-600 dark:text-green-400">${{ plan.credit_amount }}</span>
+                      </div>
+                    </div>
+                    <div v-if="plan.features.length > 0" class="mb-4 space-y-1">
+                      <div v-for="feature in plan.features" :key="feature" class="flex items-start gap-1.5">
+                        <Icon name="check" size="sm" class="mt-0.5 shrink-0 text-green-500" />
+                        <span class="text-xs text-gray-600 dark:text-gray-300">{{ feature }}</span>
+                      </div>
+                    </div>
+                    <div class="flex-1" />
+                    <button
+                      data-test="external-recharge-plan-buy"
+                      type="button"
+                      class="btn btn-primary w-full"
+                      @click="openRechargePlan(plan.purchase_url)"
+                    >
+                      {{ t('payment.buyRechargePlan') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <template v-else-if="enabledMethods.length >= 1">
             <div class="card p-6">
               <AmountInput
                 v-model="amount"
@@ -471,7 +521,7 @@ function onPaymentSettled() {
 // All checkout data from single API call
 const checkout = ref<CheckoutInfoResponse>({
   methods: {}, global_min: 0, global_max: 0,
-  plans: [], balance_disabled: false, balance_recharge_multiplier: 1, recharge_fee_rate: 0, help_text: '', help_image_url: '', stripe_publishable_key: '',
+  plans: [], recharge_plans: [], balance_disabled: false, balance_recharge_multiplier: 1, recharge_fee_rate: 0, help_text: '', help_image_url: '', stripe_publishable_key: '',
 })
 
 const tabs = computed(() => {
@@ -496,6 +546,16 @@ const planGridClass = computed(() => {
   if (n <= 2) return 'grid grid-cols-1 gap-5 sm:grid-cols-2'
   return 'grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3'
 })
+
+const rechargePlanGridClass = computed(() => {
+  const n = checkout.value.recharge_plans.length
+  if (n <= 2) return 'grid grid-cols-1 gap-5 sm:grid-cols-2'
+  return 'grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3'
+})
+
+function openRechargePlan(url: string) {
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
 
 // Check if an amount fits a method's [min, max]. 0 = no limit.
 function amountFitsMethod(amt: number, methodType: string): boolean {
@@ -980,6 +1040,12 @@ onMounted(async () => {
   try {
     const res = await paymentAPI.getCheckoutInfo()
     checkout.value = res.data
+    checkout.value.recharge_plans = (checkout.value.recharge_plans || []).map((plan) => ({
+      ...plan,
+      features: Array.isArray(plan.features)
+        ? plan.features
+        : String(plan.features || '').split('\n').map((feature) => feature.trim()).filter(Boolean),
+    }))
     if (enabledMethods.value.length) {
       const order: readonly string[] = METHOD_ORDER
       const sorted = [...enabledMethods.value].sort((a, b) => {

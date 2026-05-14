@@ -238,6 +238,69 @@ func (h *PaymentHandler) DeletePlan(c *gin.Context) {
 	response.Success(c, gin.H{"message": "deleted"})
 }
 
+// --- External Recharge Plans ---
+
+// ListRechargePlans returns all external recharge plans.
+// GET /api/v1/admin/payment/recharge-plans
+func (h *PaymentHandler) ListRechargePlans(c *gin.Context) {
+	plans, err := h.configService.ListRechargePlans(c.Request.Context())
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, plans)
+}
+
+// CreateRechargePlan creates a new external recharge plan.
+// POST /api/v1/admin/payment/recharge-plans
+func (h *PaymentHandler) CreateRechargePlan(c *gin.Context) {
+	var req service.CreateRechargePlanRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	plan, err := h.configService.CreateRechargePlan(c.Request.Context(), req)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Created(c, plan)
+}
+
+// UpdateRechargePlan updates an existing external recharge plan.
+// PUT /api/v1/admin/payment/recharge-plans/:id
+func (h *PaymentHandler) UpdateRechargePlan(c *gin.Context) {
+	id, ok := parseIDParam(c, "id")
+	if !ok {
+		return
+	}
+	var req service.UpdateRechargePlanRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	plan, err := h.configService.UpdateRechargePlan(c.Request.Context(), id, req)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, plan)
+}
+
+// DeleteRechargePlan deletes an external recharge plan.
+// DELETE /api/v1/admin/payment/recharge-plans/:id
+func (h *PaymentHandler) DeleteRechargePlan(c *gin.Context) {
+	id, ok := parseIDParam(c, "id")
+	if !ok {
+		return
+	}
+	if err := h.configService.DeleteRechargePlan(c.Request.Context(), id); err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, gin.H{"message": "deleted"})
+}
+
 // --- Provider Instances ---
 
 // ListProviders returns all payment provider instances.

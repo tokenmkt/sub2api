@@ -7,6 +7,7 @@ import { apiClient } from './client'
 import type {
   PaymentConfig,
   SubscriptionPlan,
+  RechargePlan,
   PaymentChannel,
   MethodLimitsResponse,
   CheckoutInfoResponse,
@@ -25,6 +26,11 @@ export const paymentAPI = {
   /** Get available subscription plans */
   getPlans() {
     return apiClient.get<SubscriptionPlan[]>('/payment/plans')
+  },
+
+  /** Get available external recharge plans */
+  getRechargePlans() {
+    return apiClient.get<RechargePlan[]>('/payment/recharge-plans')
   },
 
   /** Get available payment channels */
