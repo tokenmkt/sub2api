@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 func TestBuildOpenAIChatCompletionsLatencyFieldsIncludesStageTimings(t *testing.T) {
@@ -77,6 +78,26 @@ func TestBuildOpenAIChatCompletionsLatencyFieldsIncludesStageTimings(t *testing.
 	require.Equal(t, "resp-upstream", got["upstream_response_id"])
 	require.Equal(t, "gpt-5.5", got["upstream_model"])
 	require.Equal(t, true, got["openai_ws_mode"])
+}
+
+func TestLogOpenAIChatCompletionsLatencyTraceRespectsEnvSwitchAndSampling(t *testing.T) {
+	core, logs := observer.New(zap.InfoLevel)
+	reqLog := zap.New(core)
+
+	t.Setenv("OPENAI_GATEWAY_LATENCY_TRACE_ENABLED", "false")
+	t.Setenv("OPENAI_GATEWAY_LATENCY_TRACE_SAMPLE_RATE", "1")
+	logOpenAIChatCompletionsLatencyTrace(nil, reqLog, openAIChatCompletionsLatencyTraceInput{})
+	require.Equal(t, 0, logs.Len())
+
+	t.Setenv("OPENAI_GATEWAY_LATENCY_TRACE_ENABLED", "true")
+	t.Setenv("OPENAI_GATEWAY_LATENCY_TRACE_SAMPLE_RATE", "0")
+	logOpenAIChatCompletionsLatencyTrace(nil, reqLog, openAIChatCompletionsLatencyTraceInput{})
+	require.Equal(t, 0, logs.Len())
+
+	t.Setenv("OPENAI_GATEWAY_LATENCY_TRACE_SAMPLE_RATE", "1")
+	logOpenAIChatCompletionsLatencyTrace(nil, reqLog, openAIChatCompletionsLatencyTraceInput{})
+	require.Equal(t, 1, logs.Len())
+	require.Equal(t, "openai_gateway_latency", logs.All()[0].Message)
 }
 
 func zapFieldsToMap(fields []zap.Field) map[string]any {

@@ -27,6 +27,9 @@ func logOpenAIChatCompletionsLatencyTrace(c *gin.Context, reqLog *zap.Logger, in
 	if reqLog == nil {
 		return
 	}
+	if !service.ShouldSampleOpenAIGatewayLatencyTrace() {
+		return
+	}
 	reqLog.Info("openai_gateway_latency", buildOpenAIChatCompletionsLatencyFields(c, in, time.Now())...)
 }
 
