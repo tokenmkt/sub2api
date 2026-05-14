@@ -215,9 +215,6 @@ func (s *OpsAlertEvaluatorService) evaluateOnce(interval time.Duration) {
 		rulesEnabled++
 
 		scopePlatform, scopeGroupID, scopeRegion := parseOpsAlertRuleScope(rule.Filters)
-		if isGroupCodex5hMetric(rule.MetricType) && strings.TrimSpace(scopePlatform) == "" {
-			scopePlatform = PlatformOpenAI
-		}
 
 		windowMinutes := rule.WindowMinutes
 		if windowMinutes <= 0 {
@@ -524,24 +521,27 @@ func (s *OpsAlertEvaluatorService) computeRuleMetric(
 			return 0, true
 		}
 		return (float64(availability.Group.RateLimitCount) / float64(availability.Group.TotalAccounts)) * 100, true
-	case "group_codex_5h_usage_percent", "group_codex_5h_remaining_percent":
+	case "group_5h_quota_usage_percent", "group_5h_quota_remaining_percent":
 		if groupID == nil || *groupID <= 0 {
-			return 0, false
-		}
-		if strings.TrimSpace(platform) == "" {
 			return 0, false
 		}
 		if s == nil || s.opsService == nil || s.opsService.accountRepo == nil {
 			return 0, false
 		}
-		accounts, err := s.opsService.accountRepo.ListSchedulableByGroupIDAndPlatform(ctx, *groupID, platform)
+		var accounts []Account
+		var err error
+		if platform = strings.TrimSpace(platform); platform != "" {
+			accounts, err = s.opsService.accountRepo.ListSchedulableByGroupIDAndPlatform(ctx, *groupID, platform)
+		} else {
+			accounts, err = s.opsService.accountRepo.ListSchedulableByGroupIDAndPlatforms(ctx, *groupID, []string{PlatformOpenAI, PlatformAnthropic})
+		}
 		if err != nil {
 			return 0, false
 		}
-		if strings.TrimSpace(rule.MetricType) == "group_codex_5h_remaining_percent" {
-			return computeGroupCodex5hRemainingPercent(accounts, end)
+		if strings.TrimSpace(rule.MetricType) == "group_5h_quota_remaining_percent" {
+			return computeGroup5hQuotaRemainingPercent(accounts, end)
 		}
-		return computeGroupCodex5hUsagePercent(accounts, end)
+		return computeGroup5hQuotaUsagePercent(accounts, end)
 	case "account_error_ratio":
 		if s == nil || s.opsService == nil {
 			return 0, false
@@ -1056,16 +1056,7 @@ func countAccountsByCondition(accounts map[int64]*AccountAvailability, condition
 	return count
 }
 
-func isGroupCodex5hMetric(metricType string) bool {
-	switch strings.TrimSpace(metricType) {
-	case "group_codex_5h_usage_percent", "group_codex_5h_remaining_percent":
-		return true
-	default:
-		return false
-	}
-}
-
-func computeGroupCodex5hUsagePercent(accounts []Account, now time.Time) (float64, bool) {
+func computeGroup5hQuotaUsagePercent(accounts []Account, now time.Time) (float64, bool) {
 	if now.IsZero() {
 		now = time.Now().UTC()
 	}
@@ -1074,7 +1065,8 @@ func computeGroupCodex5hUsagePercent(accounts []Account, now time.Time) (float64
 	var totalWeight float64
 	for i := range accounts {
 		account := &accounts[i]
-		if account.Platform != PlatformOpenAI || account.Type != AccountTypeOAuth {
+		usage, ok := account5hQuotaUsagePercent(account, now)
+		if !ok {
 			continue
 		}
 
@@ -1083,10 +1075,6 @@ func computeGroupCodex5hUsagePercent(accounts []Account, now time.Time) (float64
 			weight = 1
 		}
 
-		usage := 0.0
-		if progress := buildCodexUsageProgressFromExtra(account.Extra, "5h", now); progress != nil {
-			usage = progress.Utilization
-		}
 		weightedUsed += usage * weight
 		totalWeight += weight
 	}
@@ -1097,17 +1085,57 @@ func computeGroupCodex5hUsagePercent(accounts []Account, now time.Time) (float64
 	return weightedUsed / totalWeight, true
 }
 
-func computeGroupCodex5hRemainingPercent(accounts []Account, now time.Time) (float64, bool) {
-	usage, ok := computeGroupCodex5hUsagePercent(accounts, now)
+func account5hQuotaUsagePercent(account *Account, now time.Time) (float64, bool) {
+	if account == nil {
+		return 0, false
+	}
+	if account.Platform == PlatformOpenAI && account.Type == AccountTypeOAuth {
+		if progress := buildCodexUsageProgressFromExtra(account.Extra, "5h", now); progress != nil {
+			return progress.Utilization, true
+		}
+		return 0, true
+	}
+	if account.IsAnthropicOAuthOrSetupToken() {
+		return anthropicSessionWindowUsagePercent(account, now), true
+	}
+	return 0, false
+}
+
+func anthropicSessionWindowUsagePercent(account *Account, now time.Time) float64 {
+	if account == nil || account.SessionWindowEnd == nil || !now.Before(*account.SessionWindowEnd) {
+		return 0
+	}
+
+	if account.Extra != nil {
+		if _, ok := account.Extra["session_window_utilization"]; ok {
+			return clampPercent(parseExtraFloat64(account.Extra["session_window_utilization"]) * 100)
+		}
+	}
+
+	switch strings.TrimSpace(account.SessionWindowStatus) {
+	case "rejected":
+		return 100
+	case "allowed_warning":
+		return 80
+	default:
+		return 0
+	}
+}
+
+func computeGroup5hQuotaRemainingPercent(accounts []Account, now time.Time) (float64, bool) {
+	usage, ok := computeGroup5hQuotaUsagePercent(accounts, now)
 	if !ok {
 		return 0, false
 	}
-	remaining := 100 - usage
-	if remaining < 0 {
-		return 0, true
+	return clampPercent(100 - usage), true
+}
+
+func clampPercent(value float64) float64 {
+	if value < 0 {
+		return 0
 	}
-	if remaining > 100 {
-		return 100, true
+	if value > 100 {
+		return 100
 	}
-	return remaining, true
+	return value
 }
