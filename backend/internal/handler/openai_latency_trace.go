@@ -8,7 +8,13 @@ import (
 	"go.uber.org/zap"
 )
 
-type openAIChatCompletionsLatencyTraceInput struct {
+type openAIChatCompletionsLatencyTraceInput = openAIGatewayLatencyTraceInput
+
+type openAIResponsesLatencyTraceInput = openAIGatewayLatencyTraceInput
+
+type gatewayResponsesLatencyTraceInput = openAIGatewayLatencyTraceInput
+
+type openAIGatewayLatencyTraceInput struct {
 	RequestStart     time.Time
 	Endpoint         string
 	Model            string
@@ -24,16 +30,36 @@ type openAIChatCompletionsLatencyTraceInput struct {
 }
 
 func logOpenAIChatCompletionsLatencyTrace(c *gin.Context, reqLog *zap.Logger, in openAIChatCompletionsLatencyTraceInput) {
+	logOpenAIGatewayLatencyTrace(c, reqLog, in)
+}
+
+func logOpenAIResponsesLatencyTrace(c *gin.Context, reqLog *zap.Logger, in openAIResponsesLatencyTraceInput) {
+	logOpenAIGatewayLatencyTrace(c, reqLog, in)
+}
+
+func logGatewayResponsesLatencyTrace(c *gin.Context, reqLog *zap.Logger, in gatewayResponsesLatencyTraceInput) {
+	logOpenAIGatewayLatencyTrace(c, reqLog, in)
+}
+
+func logOpenAIGatewayLatencyTrace(c *gin.Context, reqLog *zap.Logger, in openAIGatewayLatencyTraceInput) {
 	if reqLog == nil {
 		return
 	}
 	if !service.ShouldSampleOpenAIGatewayLatencyTrace() {
 		return
 	}
-	reqLog.Info("openai_gateway_latency", buildOpenAIChatCompletionsLatencyFields(c, in, time.Now())...)
+	reqLog.Info("openai_gateway_latency", buildOpenAIGatewayLatencyFields(c, in, time.Now())...)
 }
 
 func buildOpenAIChatCompletionsLatencyFields(c *gin.Context, in openAIChatCompletionsLatencyTraceInput, now time.Time) []zap.Field {
+	return buildOpenAIGatewayLatencyFields(c, in, now)
+}
+
+func buildOpenAIResponsesLatencyFields(c *gin.Context, in openAIResponsesLatencyTraceInput, now time.Time) []zap.Field {
+	return buildOpenAIGatewayLatencyFields(c, in, now)
+}
+
+func buildOpenAIGatewayLatencyFields(c *gin.Context, in openAIGatewayLatencyTraceInput, now time.Time) []zap.Field {
 	endpoint := in.Endpoint
 	if endpoint == "" && c != nil {
 		endpoint = c.FullPath()
@@ -108,4 +134,18 @@ func appendOpenAIChatCompletionsLatencyField(fields []zap.Field, c *gin.Context,
 		fields = append(fields, zap.Int64(fieldName, v))
 	}
 	return fields
+}
+
+func gatewayForwardResultToOpenAITraceResult(result *service.ForwardResult) *service.OpenAIForwardResult {
+	if result == nil {
+		return nil
+	}
+	return &service.OpenAIForwardResult{
+		RequestID:     result.RequestID,
+		Model:         result.Model,
+		UpstreamModel: result.UpstreamModel,
+		Stream:        result.Stream,
+		Duration:      result.Duration,
+		FirstTokenMs:  result.FirstTokenMs,
+	}
 }
