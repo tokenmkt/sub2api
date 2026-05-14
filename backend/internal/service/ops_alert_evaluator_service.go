@@ -215,6 +215,9 @@ func (s *OpsAlertEvaluatorService) evaluateOnce(interval time.Duration) {
 		rulesEnabled++
 
 		scopePlatform, scopeGroupID, scopeRegion := parseOpsAlertRuleScope(rule.Filters)
+		if strings.TrimSpace(rule.MetricType) == "group_codex_5h_usage_percent" && strings.TrimSpace(scopePlatform) == "" {
+			scopePlatform = PlatformOpenAI
+		}
 
 		windowMinutes := rule.WindowMinutes
 		if windowMinutes <= 0 {
@@ -521,6 +524,21 @@ func (s *OpsAlertEvaluatorService) computeRuleMetric(
 			return 0, true
 		}
 		return (float64(availability.Group.RateLimitCount) / float64(availability.Group.TotalAccounts)) * 100, true
+	case "group_codex_5h_usage_percent":
+		if groupID == nil || *groupID <= 0 {
+			return 0, false
+		}
+		if strings.TrimSpace(platform) == "" {
+			return 0, false
+		}
+		if s == nil || s.opsService == nil || s.opsService.accountRepo == nil {
+			return 0, false
+		}
+		accounts, err := s.opsService.accountRepo.ListSchedulableByGroupIDAndPlatform(ctx, *groupID, platform)
+		if err != nil {
+			return 0, false
+		}
+		return computeGroupCodex5hUsagePercent(accounts, end)
 	case "account_error_ratio":
 		if s == nil || s.opsService == nil {
 			return 0, false
@@ -1033,4 +1051,36 @@ func countAccountsByCondition(accounts map[int64]*AccountAvailability, condition
 		}
 	}
 	return count
+}
+
+func computeGroupCodex5hUsagePercent(accounts []Account, now time.Time) (float64, bool) {
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+
+	var weightedUsed float64
+	var totalWeight float64
+	for i := range accounts {
+		account := &accounts[i]
+		if account.Platform != PlatformOpenAI || account.Type != AccountTypeOAuth {
+			continue
+		}
+
+		weight := float64(account.EffectiveLoadFactor())
+		if weight <= 0 {
+			weight = 1
+		}
+
+		usage := 0.0
+		if progress := buildCodexUsageProgressFromExtra(account.Extra, "5h", now); progress != nil {
+			usage = progress.Utilization
+		}
+		weightedUsed += usage * weight
+		totalWeight += weight
+	}
+
+	if totalWeight <= 0 {
+		return 0, false
+	}
+	return weightedUsed / totalWeight, true
 }
