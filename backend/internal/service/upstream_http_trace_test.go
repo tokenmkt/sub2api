@@ -76,6 +76,19 @@ func TestUpstreamHTTPTraceFieldsIncludeNetworkPhaseDurations(t *testing.T) {
 	require.NotContains(t, got, "query")
 }
 
+func TestUpstreamHTTPTraceSamplingConfigRespectsEnvSwitchAndRate(t *testing.T) {
+	t.Setenv("UPSTREAM_HTTP_TRACE_ENABLED", "false")
+	t.Setenv("UPSTREAM_HTTP_TRACE_SAMPLE_RATE", "1")
+	require.False(t, ShouldSampleUpstreamHTTPTrace())
+
+	t.Setenv("UPSTREAM_HTTP_TRACE_ENABLED", "true")
+	t.Setenv("UPSTREAM_HTTP_TRACE_SAMPLE_RATE", "0")
+	require.False(t, ShouldSampleUpstreamHTTPTrace())
+
+	t.Setenv("UPSTREAM_HTTP_TRACE_SAMPLE_RATE", "1")
+	require.True(t, ShouldSampleUpstreamHTTPTrace())
+}
+
 type fakeAddr string
 
 func (a fakeAddr) Network() string { return "tcp" }

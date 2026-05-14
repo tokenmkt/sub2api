@@ -54,6 +54,9 @@ type UpstreamHTTPTraceRecorder struct {
 }
 
 func NewUpstreamHTTPTraceRecorder(req *http.Request, opts UpstreamHTTPTraceOptions) *UpstreamHTTPTraceRecorder {
+	if !ShouldSampleUpstreamHTTPTrace() {
+		return nil
+	}
 	now := opts.Now
 	if now == nil {
 		now = time.Now

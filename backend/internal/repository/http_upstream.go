@@ -135,7 +135,9 @@ func (s *httpUpstreamService) Do(req *http.Request, proxyURL string, accountID i
 		AccountID: accountID,
 		ProxyURL:  proxyURL,
 	})
-	req = trace.WithClientTrace(req)
+	if trace != nil {
+		req = trace.WithClientTrace(req)
+	}
 
 	// 获取或创建对应的客户端，并标记请求占用
 	entry, err := s.acquireClient(proxyURL, accountID, accountConcurrency)
@@ -196,7 +198,9 @@ func (s *httpUpstreamService) DoWithTLS(req *http.Request, proxyURL string, acco
 		ProxyURL:   proxyURL,
 		TLSProfile: tlsProfileName,
 	})
-	req = trace.WithClientTrace(req)
+	if trace != nil {
+		req = trace.WithClientTrace(req)
+	}
 
 	entry, err := s.acquireClientWithTLS(proxyURL, accountID, accountConcurrency, profile)
 	if err != nil {
