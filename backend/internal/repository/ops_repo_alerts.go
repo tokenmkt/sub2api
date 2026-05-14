@@ -30,6 +30,7 @@ SELECT
   sustained_minutes,
   cooldown_minutes,
   COALESCE(notify_email, true),
+  COALESCE(notify_feishu, true),
   filters,
   last_triggered_at,
   created_at,
@@ -61,6 +62,7 @@ ORDER BY id DESC`
 			&rule.SustainedMinutes,
 			&rule.CooldownMinutes,
 			&rule.NotifyEmail,
+			&rule.NotifyFeishu,
 			&filtersRaw,
 			&lastTriggeredAt,
 			&rule.CreatedAt,
@@ -112,11 +114,12 @@ INSERT INTO ops_alert_rules (
   sustained_minutes,
   cooldown_minutes,
   notify_email,
+  notify_feishu,
   filters,
   created_at,
   updated_at
 ) VALUES (
-  $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,NOW(),NOW()
+  $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW(),NOW()
 )
 RETURNING
   id,
@@ -131,6 +134,7 @@ RETURNING
   sustained_minutes,
   cooldown_minutes,
   COALESCE(notify_email, true),
+  COALESCE(notify_feishu, true),
   filters,
   last_triggered_at,
   created_at,
@@ -154,6 +158,7 @@ RETURNING
 		input.SustainedMinutes,
 		input.CooldownMinutes,
 		input.NotifyEmail,
+		input.NotifyFeishu,
 		filtersArg,
 	).Scan(
 		&out.ID,
@@ -168,6 +173,7 @@ RETURNING
 		&out.SustainedMinutes,
 		&out.CooldownMinutes,
 		&out.NotifyEmail,
+		&out.NotifyFeishu,
 		&filtersRaw,
 		&lastTriggeredAt,
 		&out.CreatedAt,
@@ -219,7 +225,8 @@ SET
   sustained_minutes = $10,
   cooldown_minutes = $11,
   notify_email = $12,
-  filters = $13,
+  notify_feishu = $13,
+  filters = $14,
   updated_at = NOW()
 WHERE id = $1
 RETURNING
@@ -235,6 +242,7 @@ RETURNING
   sustained_minutes,
   cooldown_minutes,
   COALESCE(notify_email, true),
+  COALESCE(notify_feishu, true),
   filters,
   last_triggered_at,
   created_at,
@@ -259,6 +267,7 @@ RETURNING
 		input.SustainedMinutes,
 		input.CooldownMinutes,
 		input.NotifyEmail,
+		input.NotifyFeishu,
 		filtersArg,
 	).Scan(
 		&out.ID,
@@ -273,6 +282,7 @@ RETURNING
 		&out.SustainedMinutes,
 		&out.CooldownMinutes,
 		&out.NotifyEmail,
+		&out.NotifyFeishu,
 		&filtersRaw,
 		&lastTriggeredAt,
 		&out.CreatedAt,

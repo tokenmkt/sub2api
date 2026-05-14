@@ -170,7 +170,7 @@ func TestMaybeSendAlertEmail_SendsFeishuWebhookWhenConfigured(t *testing.T) {
 
 	opsSvc := &OpsService{settingRepo: repo}
 	evaluator := NewOpsAlertEvaluatorService(opsSvc, &opsRepoMock{}, nil, nil, nil)
-	rule := &OpsAlertRule{ID: 1, Name: "High error rate", Severity: "critical", MetricType: "error_rate", Operator: ">", Threshold: 5, NotifyEmail: true}
+	rule := &OpsAlertRule{ID: 1, Name: "High error rate", Severity: "critical", MetricType: "error_rate", Operator: ">", Threshold: 5, NotifyEmail: true, NotifyFeishu: true}
 	value := 9.2
 	event := &OpsAlertEvent{ID: 10, RuleID: 1, Status: "firing", MetricValue: &value, FiredAt: time.Now().UTC(), Description: "error_rate above threshold"}
 
@@ -179,6 +179,92 @@ func TestMaybeSendAlertEmail_SendsFeishuWebhookWhenConfigured(t *testing.T) {
 	}
 	if webhookCalls != 1 {
 		t.Fatalf("webhook calls = %d, want 1", webhookCalls)
+	}
+}
+
+func TestMaybeSendAlertEmail_SendsFeishuWhenEmailDisabledForRule(t *testing.T) {
+	var webhookCalls int
+	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		webhookCalls++
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body:       io.NopCloser(strings.NewReader(`{"StatusCode":0,"msg":"success"}`)),
+		}, nil
+	})}
+
+	oldClient := feishuWebhookHTTPClient
+	feishuWebhookHTTPClient = client
+	defer func() {
+		feishuWebhookHTTPClient = oldClient
+	}()
+
+	repo := newRuntimeSettingRepoStub()
+	cfg := defaultOpsEmailNotificationConfig()
+	cfg.Alert.Enabled = false
+	cfg.Feishu.Alert.Enabled = true
+	cfg.Feishu.Alert.WebhookURLs = []string{"https://open.feishu.cn/open-apis/bot/v2/hook/test"}
+	cfg.Feishu.Alert.ActionToken = "card-action-token"
+	raw, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatalf("marshal config: %v", err)
+	}
+	repo.values[SettingKeyOpsEmailNotificationConfig] = string(raw)
+
+	opsSvc := &OpsService{settingRepo: repo}
+	evaluator := NewOpsAlertEvaluatorService(opsSvc, &opsRepoMock{}, nil, nil, nil)
+	rule := &OpsAlertRule{ID: 1, Name: "High error rate", Severity: "critical", MetricType: "error_rate", Operator: ">", Threshold: 5, NotifyEmail: false, NotifyFeishu: true}
+	value := 9.2
+	event := &OpsAlertEvent{ID: 10, RuleID: 1, Status: "firing", MetricValue: &value, FiredAt: time.Now().UTC(), Description: "error_rate above threshold"}
+
+	if sent := evaluator.maybeSendAlertEmail(context.Background(), nil, rule, event); !sent {
+		t.Fatalf("maybeSendAlertEmail() = false, want true")
+	}
+	if webhookCalls != 1 {
+		t.Fatalf("webhook calls = %d, want 1", webhookCalls)
+	}
+}
+
+func TestMaybeSendAlertEmail_DoesNotSendFeishuWhenRuleDisablesFeishu(t *testing.T) {
+	var webhookCalls int
+	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		webhookCalls++
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body:       io.NopCloser(strings.NewReader(`{"StatusCode":0,"msg":"success"}`)),
+		}, nil
+	})}
+
+	oldClient := feishuWebhookHTTPClient
+	feishuWebhookHTTPClient = client
+	defer func() {
+		feishuWebhookHTTPClient = oldClient
+	}()
+
+	repo := newRuntimeSettingRepoStub()
+	cfg := defaultOpsEmailNotificationConfig()
+	cfg.Alert.Enabled = false
+	cfg.Feishu.Alert.Enabled = true
+	cfg.Feishu.Alert.WebhookURLs = []string{"https://open.feishu.cn/open-apis/bot/v2/hook/test"}
+	cfg.Feishu.Alert.ActionToken = "card-action-token"
+	raw, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatalf("marshal config: %v", err)
+	}
+	repo.values[SettingKeyOpsEmailNotificationConfig] = string(raw)
+
+	opsSvc := &OpsService{settingRepo: repo}
+	evaluator := NewOpsAlertEvaluatorService(opsSvc, &opsRepoMock{}, nil, nil, nil)
+	rule := &OpsAlertRule{ID: 1, Name: "High error rate", Severity: "critical", MetricType: "error_rate", Operator: ">", Threshold: 5, NotifyEmail: false, NotifyFeishu: false}
+	value := 9.2
+	event := &OpsAlertEvent{ID: 10, RuleID: 1, Status: "firing", MetricValue: &value, FiredAt: time.Now().UTC(), Description: "error_rate above threshold"}
+
+	if sent := evaluator.maybeSendAlertEmail(context.Background(), nil, rule, event); sent {
+		t.Fatalf("maybeSendAlertEmail() = true, want false")
+	}
+	if webhookCalls != 0 {
+		t.Fatalf("webhook calls = %d, want 0", webhookCalls)
 	}
 }
 
