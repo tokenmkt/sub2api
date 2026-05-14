@@ -275,6 +275,38 @@ func TestComputeGroupCodex5hUsagePercent(t *testing.T) {
 	require.InDelta(t, 28.0, got, 0.0001)
 }
 
+func TestComputeGroupCodex5hRemainingPercent(t *testing.T) {
+	t.Parallel()
+
+	now := time.Date(2026, 3, 8, 10, 0, 0, 0, time.UTC)
+	futureReset := now.Add(time.Hour).Format(time.RFC3339)
+
+	accounts := []Account{
+		{
+			ID:       1,
+			Platform: PlatformOpenAI,
+			Type:     AccountTypeOAuth,
+			Extra: map[string]any{
+				"codex_5h_used_percent": 95.0,
+				"codex_5h_reset_at":     futureReset,
+			},
+		},
+		{
+			ID:       2,
+			Platform: PlatformOpenAI,
+			Type:     AccountTypeOAuth,
+			Extra: map[string]any{
+				"codex_5h_used_percent": 105.0,
+				"codex_5h_reset_at":     futureReset,
+			},
+		},
+	}
+
+	got, ok := computeGroupCodex5hRemainingPercent(accounts, now)
+	require.True(t, ok)
+	require.InDelta(t, 0.0, got, 0.0001)
+}
+
 func TestComputeRuleMetricGroupCodex5hUsagePercent(t *testing.T) {
 	t.Parallel()
 
@@ -310,4 +342,41 @@ func TestComputeRuleMetricGroupCodex5hUsagePercent(t *testing.T) {
 	require.True(t, gotOK)
 	require.True(t, repo.called)
 	require.InDelta(t, 90.0, gotValue, 0.0001)
+}
+
+func TestComputeRuleMetricGroupCodex5hRemainingPercent(t *testing.T) {
+	t.Parallel()
+
+	groupID := int64(101)
+	repo := &codexCapacityAccountRepoStub{
+		accounts: []Account{
+			{
+				ID:       1,
+				Platform: PlatformOpenAI,
+				Type:     AccountTypeOAuth,
+				Extra: map[string]any{
+					"codex_5h_used_percent": 90.0,
+					"codex_5h_reset_at":     time.Now().UTC().Add(time.Hour).Format(time.RFC3339),
+				},
+			},
+		},
+	}
+	svc := &OpsAlertEvaluatorService{
+		opsService: &OpsService{accountRepo: repo},
+		opsRepo:    &stubOpsRepo{overview: &OpsDashboardOverview{}},
+	}
+
+	gotValue, gotOK := svc.computeRuleMetric(
+		context.Background(),
+		&OpsAlertRule{MetricType: "group_codex_5h_remaining_percent"},
+		nil,
+		time.Now().UTC().Add(-time.Minute),
+		time.Now().UTC(),
+		PlatformOpenAI,
+		&groupID,
+	)
+
+	require.True(t, gotOK)
+	require.True(t, repo.called)
+	require.InDelta(t, 10.0, gotValue, 0.0001)
 }
