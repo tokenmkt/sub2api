@@ -152,4 +152,19 @@ describe('PaymentView external recharge plans', () => {
     expect(windowOpen).toHaveBeenCalledWith('https://shop.example.com/buy/starter', '_blank', 'noopener,noreferrer')
     expect(createOrder).not.toHaveBeenCalled()
   })
+
+  it('does not show the platform recharge unavailable panel when external plans exist', async () => {
+    const wrapper = shallowMount(PaymentView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          Teleport: true,
+          Transition: false,
+        },
+      },
+    })
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('payment.notAvailable')
+  })
 })
