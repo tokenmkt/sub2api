@@ -158,7 +158,7 @@ func buildFeishuAlertCard(title string, body string, ctx *OpsFeishuAlertCardCont
 		},
 		Elements: []feishuMessageCardElement{
 			{
-				Tag:  "markdown",
+				Tag:  "div",
 				Text: &feishuMessageCardText{Tag: "lark_md", Content: body},
 			},
 			{

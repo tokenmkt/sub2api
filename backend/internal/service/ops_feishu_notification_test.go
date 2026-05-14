@@ -115,6 +115,28 @@ func TestSendFeishuWebhookNotification_PostsInteractiveCardPayload(t *testing.T)
 			t.Fatalf("card payload missing %q: %s", want, cardText)
 		}
 	}
+
+	elements, ok := card["elements"].([]any)
+	if !ok || len(elements) < 1 {
+		t.Fatalf("card elements = %#v, want at least one content element", card["elements"])
+	}
+	contentElement, ok := elements[0].(map[string]any)
+	if !ok {
+		t.Fatalf("first card element = %#v, want object", elements[0])
+	}
+	if got := contentElement["tag"]; got != "div" {
+		t.Fatalf("first card element tag = %#v, want div so Feishu renders lark_md text", got)
+	}
+	textElement, ok := contentElement["text"].(map[string]any)
+	if !ok {
+		t.Fatalf("first card element text = %#v, want object", contentElement["text"])
+	}
+	if got := textElement["tag"]; got != "lark_md" {
+		t.Fatalf("first card text tag = %#v, want lark_md", got)
+	}
+	if got := textElement["content"]; got != "service unavailable" {
+		t.Fatalf("first card text content = %#v, want service unavailable", got)
+	}
 }
 
 func TestMaybeSendAlertEmail_SendsFeishuWebhookWhenConfigured(t *testing.T) {
