@@ -100,6 +100,56 @@ func TestLogOpenAIChatCompletionsLatencyTraceRespectsEnvSwitchAndSampling(t *tes
 	require.Equal(t, "openai_gateway_latency", logs.All()[0].Message)
 }
 
+func TestBuildOpenAIResponsesLatencyFieldsIncludesEndpointAndUpstreamModel(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest("POST", "/v1/responses", nil)
+	c.Set(service.OpsAuthLatencyMsKey, int64(10))
+	c.Set(service.OpsRoutingLatencyMsKey, int64(20))
+	c.Set(service.OpsUpstreamLatencyMsKey, int64(300))
+	c.Set(service.OpsResponseLatencyMsKey, int64(40))
+	c.Set(service.OpsTimeToFirstTokenMsKey, int64(500))
+
+	start := time.Unix(100, 0)
+	now := start.Add(900 * time.Millisecond)
+	firstToken := 500
+	fields := buildOpenAIResponsesLatencyFields(c, openAIResponsesLatencyTraceInput{
+		RequestStart:     start,
+		Endpoint:         "/v1/responses",
+		Model:            "gpt-5.5",
+		Stream:           true,
+		Status:           200,
+		UserID:           11,
+		APIKeyID:         12,
+		Account:          &service.Account{ID: 77, Platform: service.PlatformOpenAI, Type: service.AccountTypeOAuth},
+		SwitchCount:      1,
+		RequestBodyBytes: 456,
+		Result: &service.OpenAIForwardResult{
+			RequestID:     "req-responses",
+			ResponseID:    "resp-responses",
+			UpstreamModel: "gpt-5.5-codex",
+			OpenAIWSMode:  true,
+			FirstTokenMs:  &firstToken,
+		},
+	}, now)
+
+	got := zapFieldsToMap(fields)
+	require.Equal(t, "openai_gateway_latency", got["event"])
+	require.Equal(t, "/v1/responses", got["endpoint"])
+	require.Equal(t, "gpt-5.5", got["model"])
+	require.Equal(t, "gpt-5.5-codex", got["upstream_model"])
+	require.Equal(t, int64(900), got["total_ms"])
+	require.Equal(t, int64(10), got["auth_ms"])
+	require.Equal(t, int64(20), got["routing_ms"])
+	require.Equal(t, int64(300), got["upstream_ms"])
+	require.Equal(t, int64(40), got["response_ms"])
+	require.Equal(t, int64(500), got["first_token_ms"])
+	require.Equal(t, int64(77), got["account_id"])
+	require.Equal(t, int64(1), got["switch_count"])
+	require.Equal(t, int64(456), got["request_body_bytes"])
+	require.Equal(t, true, got["openai_ws_mode"])
+}
+
 func zapFieldsToMap(fields []zap.Field) map[string]any {
 	out := make(map[string]any, len(fields))
 	for _, field := range fields {

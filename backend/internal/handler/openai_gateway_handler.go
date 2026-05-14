@@ -443,6 +443,20 @@ func (h *OpenAIGatewayHandler) Responses(c *gin.Context) {
 			zap.Int64("account_id", account.ID),
 			zap.Int("switch_count", switchCount),
 		)
+		logOpenAIResponsesLatencyTrace(c, reqLog, openAIResponsesLatencyTraceInput{
+			RequestStart:     requestStart,
+			Endpoint:         GetInboundEndpoint(c),
+			Model:            reqModel,
+			Stream:           reqStream,
+			Status:           c.Writer.Status(),
+			UserID:           subject.UserID,
+			APIKeyID:         apiKey.ID,
+			GroupID:          apiKey.GroupID,
+			Account:          account,
+			SwitchCount:      switchCount,
+			RequestBodyBytes: len(body),
+			Result:           result,
+		})
 		return
 	}
 }
