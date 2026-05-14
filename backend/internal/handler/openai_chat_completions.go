@@ -281,6 +281,20 @@ func (h *OpenAIGatewayHandler) ChatCompletions(c *gin.Context) {
 			zap.Int64("account_id", account.ID),
 			zap.Int("switch_count", switchCount),
 		)
+		logOpenAIChatCompletionsLatencyTrace(c, reqLog, openAIChatCompletionsLatencyTraceInput{
+			RequestStart:     requestStart,
+			Endpoint:         "/v1/chat/completions",
+			Model:            reqModel,
+			Stream:           reqStream,
+			Status:           c.Writer.Status(),
+			UserID:           subject.UserID,
+			APIKeyID:         apiKey.ID,
+			GroupID:          apiKey.GroupID,
+			Account:          account,
+			SwitchCount:      switchCount,
+			RequestBodyBytes: len(body),
+			Result:           result,
+		})
 		return
 	}
 }

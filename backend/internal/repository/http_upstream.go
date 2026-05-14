@@ -131,10 +131,16 @@ func (s *httpUpstreamService) Do(req *http.Request, proxyURL string, accountID i
 	if err := s.validateRequestHost(req); err != nil {
 		return nil, err
 	}
+	trace := service.NewUpstreamHTTPTraceRecorder(req, service.UpstreamHTTPTraceOptions{
+		AccountID: accountID,
+		ProxyURL:  proxyURL,
+	})
+	req = trace.WithClientTrace(req)
 
 	// 获取或创建对应的客户端，并标记请求占用
 	entry, err := s.acquireClient(proxyURL, accountID, accountConcurrency)
 	if err != nil {
+		trace.Log(req.Context(), 0, err, time.Now())
 		return nil, err
 	}
 
@@ -144,6 +150,7 @@ func (s *httpUpstreamService) Do(req *http.Request, proxyURL string, accountID i
 		// 请求失败，立即减少计数
 		atomic.AddInt64(&entry.inFlight, -1)
 		atomic.StoreInt64(&entry.lastUsed, time.Now().UnixNano())
+		trace.Log(req.Context(), 0, err, time.Now())
 		return nil, err
 	}
 
@@ -155,6 +162,7 @@ func (s *httpUpstreamService) Do(req *http.Request, proxyURL string, accountID i
 	resp.Body = wrapTrackedBody(resp.Body, func() {
 		atomic.AddInt64(&entry.inFlight, -1)
 		atomic.StoreInt64(&entry.lastUsed, time.Now().UnixNano())
+		trace.Log(req.Context(), resp.StatusCode, nil, time.Now())
 	})
 
 	return resp, nil
@@ -168,6 +176,7 @@ func (s *httpUpstreamService) DoWithTLS(req *http.Request, proxyURL string, acco
 	if profile == nil {
 		return s.Do(req, proxyURL, accountID, accountConcurrency)
 	}
+	tlsProfileName := profile.Name
 
 	targetHost := ""
 	if req != nil && req.URL != nil {
@@ -182,10 +191,17 @@ func (s *httpUpstreamService) DoWithTLS(req *http.Request, proxyURL string, acco
 	if err := s.validateRequestHost(req); err != nil {
 		return nil, err
 	}
+	trace := service.NewUpstreamHTTPTraceRecorder(req, service.UpstreamHTTPTraceOptions{
+		AccountID:  accountID,
+		ProxyURL:   proxyURL,
+		TLSProfile: tlsProfileName,
+	})
+	req = trace.WithClientTrace(req)
 
 	entry, err := s.acquireClientWithTLS(proxyURL, accountID, accountConcurrency, profile)
 	if err != nil {
 		slog.Debug("tls_fingerprint_acquire_client_failed", "account_id", accountID, "error", err)
+		trace.Log(req.Context(), 0, err, time.Now())
 		return nil, err
 	}
 
@@ -194,6 +210,7 @@ func (s *httpUpstreamService) DoWithTLS(req *http.Request, proxyURL string, acco
 		atomic.AddInt64(&entry.inFlight, -1)
 		atomic.StoreInt64(&entry.lastUsed, time.Now().UnixNano())
 		slog.Debug("tls_fingerprint_request_failed", "account_id", accountID, "error", err)
+		trace.Log(req.Context(), 0, err, time.Now())
 		return nil, err
 	}
 
@@ -202,6 +219,7 @@ func (s *httpUpstreamService) DoWithTLS(req *http.Request, proxyURL string, acco
 	resp.Body = wrapTrackedBody(resp.Body, func() {
 		atomic.AddInt64(&entry.inFlight, -1)
 		atomic.StoreInt64(&entry.lastUsed, time.Now().UnixNano())
+		trace.Log(req.Context(), resp.StatusCode, nil, time.Now())
 	})
 
 	return resp, nil
