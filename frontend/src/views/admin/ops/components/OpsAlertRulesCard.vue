@@ -7,6 +7,7 @@ import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import Select, { type SelectOption } from '@/components/common/Select.vue'
 import { adminAPI } from '@/api'
 import { opsAPI } from '@/api/admin/ops'
+import type { GroupPlatform } from '@/types'
 import type { AlertRule, MetricType, Operator } from '../types'
 import type { OpsSeverity } from '@/api/admin/ops'
 import { formatDateTime } from '../utils/opsFormatters'
@@ -60,9 +61,19 @@ const groupMetricTypes = new Set<MetricType>([
   'group_available_accounts',
   'group_available_ratio',
   'group_rate_limit_ratio',
-  'group_codex_5h_usage_percent',
-  'group_codex_5h_remaining_percent'
+  'group_5h_quota_usage_percent',
+  'group_5h_quota_remaining_percent'
 ])
+
+const groupPlatformById = computed(() => {
+  const map = new Map<number, GroupPlatform>()
+  for (const option of groupOptionsBase.value) {
+    if (typeof option.value === 'number' && typeof option.platform === 'string') {
+      map.set(option.value, option.platform as GroupPlatform)
+    }
+  }
+  return map
+})
 
 function parsePositiveInt(value: unknown): number | null {
   if (value == null) return null
@@ -76,7 +87,7 @@ const groupOptionsBase = ref<SelectOption[]>([])
 async function loadGroups() {
   try {
     const list = await adminAPI.groups.getAll()
-    groupOptionsBase.value = list.map((g) => ({ value: g.id, label: g.name }))
+    groupOptionsBase.value = list.map((g) => ({ value: g.id, label: g.name, platform: g.platform }))
   } catch (err) {
     console.error('[OpsAlertRulesCard] Failed to load groups', err)
     groupOptionsBase.value = []
@@ -97,6 +108,7 @@ const draftGroupId = computed<number | null>({
     if (value == null) {
       if (!draft.value.filters) return
       delete draft.value.filters.group_id
+      delete draft.value.filters.platform
       if (Object.keys(draft.value.filters).length === 0) {
         delete draft.value.filters
       }
@@ -104,6 +116,12 @@ const draftGroupId = computed<number | null>({
     }
     if (!draft.value.filters) draft.value.filters = {}
     draft.value.filters.group_id = value
+    const platform = groupPlatformById.value.get(value)
+    if (platform) {
+      draft.value.filters.platform = platform
+    } else {
+      delete draft.value.filters.platform
+    }
   }
 })
 
@@ -197,19 +215,19 @@ const metricDefinitions = computed(() => {
       unit: '%'
     },
     {
-      type: 'group_codex_5h_usage_percent',
+      type: 'group_5h_quota_usage_percent',
       group: 'group',
-      label: t('admin.ops.alertRules.metrics.groupCodex5hUsagePercent'),
-      description: t('admin.ops.alertRules.metricDescriptions.groupCodex5hUsagePercent'),
+      label: t('admin.ops.alertRules.metrics.group5hQuotaUsagePercent'),
+      description: t('admin.ops.alertRules.metricDescriptions.group5hQuotaUsagePercent'),
       recommendedOperator: '>=',
       recommendedThreshold: 90,
       unit: '%'
     },
     {
-      type: 'group_codex_5h_remaining_percent',
+      type: 'group_5h_quota_remaining_percent',
       group: 'group',
-      label: t('admin.ops.alertRules.metrics.groupCodex5hRemainingPercent'),
-      description: t('admin.ops.alertRules.metricDescriptions.groupCodex5hRemainingPercent'),
+      label: t('admin.ops.alertRules.metrics.group5hQuotaRemainingPercent'),
+      description: t('admin.ops.alertRules.metricDescriptions.group5hQuotaRemainingPercent'),
       recommendedOperator: '<=',
       recommendedThreshold: 10,
       unit: '%'
@@ -348,12 +366,22 @@ const editorValidation = computed(() => {
   return { valid: errors.length === 0, errors }
 })
 
+function syncGroupPlatformFilter(rule: AlertRule) {
+  const groupID = parsePositiveInt(rule.filters?.group_id)
+  if (!groupID) return
+  const platform = groupPlatformById.value.get(groupID)
+  if (!platform) return
+  if (!rule.filters) rule.filters = {}
+  rule.filters.platform = platform
+}
+
 async function save() {
   if (!draft.value) return
   if (!editorValidation.value.valid) {
     appStore.showError(editorValidation.value.errors[0] || t('admin.ops.alertRules.validation.invalid'))
     return
   }
+  syncGroupPlatformFilter(draft.value)
   saving.value = true
   try {
     if (editingId.value) {

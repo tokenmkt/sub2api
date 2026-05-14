@@ -211,18 +211,28 @@ func TestComputeRuleMetricNewIndicators(t *testing.T) {
 	}
 }
 
-type codexCapacityAccountRepoStub struct {
+type group5hQuotaAccountRepoStub struct {
 	AccountRepository
-	accounts []Account
-	called   bool
+	accounts        []Account
+	called          bool
+	calledPlatforms bool
+	platform        string
+	platforms       []string
 }
 
-func (r *codexCapacityAccountRepoStub) ListSchedulableByGroupIDAndPlatform(ctx context.Context, groupID int64, platform string) ([]Account, error) {
+func (r *group5hQuotaAccountRepoStub) ListSchedulableByGroupIDAndPlatform(ctx context.Context, groupID int64, platform string) ([]Account, error) {
 	r.called = true
+	r.platform = platform
 	return r.accounts, nil
 }
 
-func TestComputeGroupCodex5hUsagePercent(t *testing.T) {
+func (r *group5hQuotaAccountRepoStub) ListSchedulableByGroupIDAndPlatforms(ctx context.Context, groupID int64, platforms []string) ([]Account, error) {
+	r.calledPlatforms = true
+	r.platforms = append([]string(nil), platforms...)
+	return r.accounts, nil
+}
+
+func TestComputeGroup5hQuotaUsagePercent_OpenAI(t *testing.T) {
 	t.Parallel()
 
 	now := time.Date(2026, 3, 8, 10, 0, 0, 0, time.UTC)
@@ -270,12 +280,59 @@ func TestComputeGroupCodex5hUsagePercent(t *testing.T) {
 		},
 	}
 
-	got, ok := computeGroupCodex5hUsagePercent(accounts, now)
+	got, ok := computeGroup5hQuotaUsagePercent(accounts, now)
 	require.True(t, ok)
 	require.InDelta(t, 28.0, got, 0.0001)
 }
 
-func TestComputeGroupCodex5hRemainingPercent(t *testing.T) {
+func TestComputeGroup5hQuotaUsagePercent_Anthropic(t *testing.T) {
+	t.Parallel()
+
+	now := time.Date(2026, 3, 8, 10, 0, 0, 0, time.UTC)
+	futureReset := now.Add(time.Hour)
+	weightThree := 3
+
+	accounts := []Account{
+		{
+			ID:                  1,
+			Platform:            PlatformAnthropic,
+			Type:                AccountTypeOAuth,
+			SessionWindowEnd:    &futureReset,
+			SessionWindowStatus: "allowed",
+			Extra: map[string]any{
+				"session_window_utilization": 0.4,
+			},
+		},
+		{
+			ID:                  2,
+			Platform:            PlatformAnthropic,
+			Type:                AccountTypeSetupToken,
+			LoadFactor:          &weightThree,
+			SessionWindowEnd:    &futureReset,
+			SessionWindowStatus: "allowed_warning",
+		},
+		{
+			ID:                  3,
+			Platform:            PlatformAnthropic,
+			Type:                AccountTypeSetupToken,
+			SessionWindowEnd:    &futureReset,
+			SessionWindowStatus: "rejected",
+		},
+		{
+			ID:                  4,
+			Platform:            PlatformAnthropic,
+			Type:                AccountTypeAPIKey,
+			SessionWindowEnd:    &futureReset,
+			SessionWindowStatus: "rejected",
+		},
+	}
+
+	got, ok := computeGroup5hQuotaUsagePercent(accounts, now)
+	require.True(t, ok)
+	require.InDelta(t, 76.0, got, 0.0001)
+}
+
+func TestComputeGroup5hQuotaRemainingPercent(t *testing.T) {
 	t.Parallel()
 
 	now := time.Date(2026, 3, 8, 10, 0, 0, 0, time.UTC)
@@ -302,16 +359,16 @@ func TestComputeGroupCodex5hRemainingPercent(t *testing.T) {
 		},
 	}
 
-	got, ok := computeGroupCodex5hRemainingPercent(accounts, now)
+	got, ok := computeGroup5hQuotaRemainingPercent(accounts, now)
 	require.True(t, ok)
 	require.InDelta(t, 0.0, got, 0.0001)
 }
 
-func TestComputeRuleMetricGroupCodex5hUsagePercent(t *testing.T) {
+func TestComputeRuleMetricGroup5hQuotaUsagePercent(t *testing.T) {
 	t.Parallel()
 
 	groupID := int64(101)
-	repo := &codexCapacityAccountRepoStub{
+	repo := &group5hQuotaAccountRepoStub{
 		accounts: []Account{
 			{
 				ID:       1,
@@ -331,7 +388,7 @@ func TestComputeRuleMetricGroupCodex5hUsagePercent(t *testing.T) {
 
 	gotValue, gotOK := svc.computeRuleMetric(
 		context.Background(),
-		&OpsAlertRule{MetricType: "group_codex_5h_usage_percent"},
+		&OpsAlertRule{MetricType: "group_5h_quota_usage_percent"},
 		nil,
 		time.Now().UTC().Add(-time.Minute),
 		time.Now().UTC(),
@@ -344,11 +401,51 @@ func TestComputeRuleMetricGroupCodex5hUsagePercent(t *testing.T) {
 	require.InDelta(t, 90.0, gotValue, 0.0001)
 }
 
-func TestComputeRuleMetricGroupCodex5hRemainingPercent(t *testing.T) {
+func TestComputeRuleMetricGroup5hQuotaUsagePercentInfersAnthropicPlatform(t *testing.T) {
 	t.Parallel()
 
 	groupID := int64(101)
-	repo := &codexCapacityAccountRepoStub{
+	resetAt := time.Now().UTC().Add(time.Hour)
+	repo := &group5hQuotaAccountRepoStub{
+		accounts: []Account{
+			{
+				ID:                  1,
+				Platform:            PlatformAnthropic,
+				Type:                AccountTypeOAuth,
+				SessionWindowEnd:    &resetAt,
+				SessionWindowStatus: "allowed",
+				Extra: map[string]any{
+					"session_window_utilization": 0.4,
+				},
+			},
+		},
+	}
+	svc := &OpsAlertEvaluatorService{
+		opsService: &OpsService{accountRepo: repo},
+		opsRepo:    &stubOpsRepo{overview: &OpsDashboardOverview{}},
+	}
+
+	gotValue, gotOK := svc.computeRuleMetric(
+		context.Background(),
+		&OpsAlertRule{MetricType: "group_5h_quota_usage_percent"},
+		nil,
+		time.Now().UTC().Add(-time.Minute),
+		time.Now().UTC(),
+		"",
+		&groupID,
+	)
+
+	require.True(t, gotOK)
+	require.True(t, repo.calledPlatforms)
+	require.ElementsMatch(t, []string{PlatformOpenAI, PlatformAnthropic}, repo.platforms)
+	require.InDelta(t, 40.0, gotValue, 0.0001)
+}
+
+func TestComputeRuleMetricGroup5hQuotaRemainingPercent(t *testing.T) {
+	t.Parallel()
+
+	groupID := int64(101)
+	repo := &group5hQuotaAccountRepoStub{
 		accounts: []Account{
 			{
 				ID:       1,
@@ -368,7 +465,7 @@ func TestComputeRuleMetricGroupCodex5hRemainingPercent(t *testing.T) {
 
 	gotValue, gotOK := svc.computeRuleMetric(
 		context.Background(),
-		&OpsAlertRule{MetricType: "group_codex_5h_remaining_percent"},
+		&OpsAlertRule{MetricType: "group_5h_quota_remaining_percent"},
 		nil,
 		time.Now().UTC().Add(-time.Minute),
 		time.Now().UTC(),
