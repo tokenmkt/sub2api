@@ -59,7 +59,8 @@ interface MetricDefinition {
 const groupMetricTypes = new Set<MetricType>([
   'group_available_accounts',
   'group_available_ratio',
-  'group_rate_limit_ratio'
+  'group_rate_limit_ratio',
+  'group_codex_5h_usage_percent'
 ])
 
 function parsePositiveInt(value: unknown): number | null {
@@ -192,6 +193,15 @@ const metricDefinitions = computed(() => {
       description: t('admin.ops.alertRules.metricDescriptions.groupRateLimitRatio'),
       recommendedOperator: '>',
       recommendedThreshold: 10,
+      unit: '%'
+    },
+    {
+      type: 'group_codex_5h_usage_percent',
+      group: 'group',
+      label: t('admin.ops.alertRules.metrics.groupCodex5hUsagePercent'),
+      description: t('admin.ops.alertRules.metricDescriptions.groupCodex5hUsagePercent'),
+      recommendedOperator: '>=',
+      recommendedThreshold: 90,
       unit: '%'
     },
 

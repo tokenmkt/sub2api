@@ -210,3 +210,104 @@ func TestComputeRuleMetricNewIndicators(t *testing.T) {
 		})
 	}
 }
+
+type codexCapacityAccountRepoStub struct {
+	AccountRepository
+	accounts []Account
+	called   bool
+}
+
+func (r *codexCapacityAccountRepoStub) ListSchedulableByGroupIDAndPlatform(ctx context.Context, groupID int64, platform string) ([]Account, error) {
+	r.called = true
+	return r.accounts, nil
+}
+
+func TestComputeGroupCodex5hUsagePercent(t *testing.T) {
+	t.Parallel()
+
+	now := time.Date(2026, 3, 8, 10, 0, 0, 0, time.UTC)
+	expiredReset := now.Add(-time.Minute).Format(time.RFC3339)
+	futureReset := now.Add(time.Hour).Format(time.RFC3339)
+	weightThree := 3
+
+	accounts := []Account{
+		{
+			ID:       1,
+			Platform: PlatformOpenAI,
+			Type:     AccountTypeOAuth,
+			Extra: map[string]any{
+				"codex_5h_used_percent": 80.0,
+				"codex_5h_reset_at":     futureReset,
+			},
+		},
+		{
+			ID:         2,
+			Platform:   PlatformOpenAI,
+			Type:       AccountTypeOAuth,
+			LoadFactor: &weightThree,
+			Extra: map[string]any{
+				"codex_5h_used_percent": 20.0,
+				"codex_5h_reset_at":     futureReset,
+			},
+		},
+		{
+			ID:       3,
+			Platform: PlatformOpenAI,
+			Type:     AccountTypeOAuth,
+			Extra: map[string]any{
+				"codex_5h_used_percent": 99.0,
+				"codex_5h_reset_at":     expiredReset,
+			},
+		},
+		{
+			ID:       4,
+			Platform: PlatformOpenAI,
+			Type:     AccountTypeAPIKey,
+			Extra: map[string]any{
+				"codex_5h_used_percent": 100.0,
+				"codex_5h_reset_at":     futureReset,
+			},
+		},
+	}
+
+	got, ok := computeGroupCodex5hUsagePercent(accounts, now)
+	require.True(t, ok)
+	require.InDelta(t, 28.0, got, 0.0001)
+}
+
+func TestComputeRuleMetricGroupCodex5hUsagePercent(t *testing.T) {
+	t.Parallel()
+
+	groupID := int64(101)
+	repo := &codexCapacityAccountRepoStub{
+		accounts: []Account{
+			{
+				ID:       1,
+				Platform: PlatformOpenAI,
+				Type:     AccountTypeOAuth,
+				Extra: map[string]any{
+					"codex_5h_used_percent": 90.0,
+					"codex_5h_reset_at":     time.Now().UTC().Add(time.Hour).Format(time.RFC3339),
+				},
+			},
+		},
+	}
+	svc := &OpsAlertEvaluatorService{
+		opsService: &OpsService{accountRepo: repo},
+		opsRepo:    &stubOpsRepo{overview: &OpsDashboardOverview{}},
+	}
+
+	gotValue, gotOK := svc.computeRuleMetric(
+		context.Background(),
+		&OpsAlertRule{MetricType: "group_codex_5h_usage_percent"},
+		nil,
+		time.Now().UTC().Add(-time.Minute),
+		time.Now().UTC(),
+		PlatformOpenAI,
+		&groupID,
+	)
+
+	require.True(t, gotOK)
+	require.True(t, repo.called)
+	require.InDelta(t, 90.0, gotValue, 0.0001)
+}
