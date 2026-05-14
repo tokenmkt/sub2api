@@ -55,6 +55,7 @@ type feishuMessageCardText struct {
 
 type feishuMessageCardElement struct {
 	Tag     string                    `json:"tag"`
+	Content string                    `json:"content,omitempty"`
 	Text    *feishuMessageCardText    `json:"text,omitempty"`
 	Actions []feishuMessageCardAction `json:"actions,omitempty"`
 }
@@ -158,8 +159,8 @@ func buildFeishuAlertCard(title string, body string, ctx *OpsFeishuAlertCardCont
 		},
 		Elements: []feishuMessageCardElement{
 			{
-				Tag:  "div",
-				Text: &feishuMessageCardText{Tag: "lark_md", Content: body},
+				Tag:     "markdown",
+				Content: body,
 			},
 			{
 				Tag: "action",
