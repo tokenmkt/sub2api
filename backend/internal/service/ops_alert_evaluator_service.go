@@ -215,7 +215,7 @@ func (s *OpsAlertEvaluatorService) evaluateOnce(interval time.Duration) {
 		rulesEnabled++
 
 		scopePlatform, scopeGroupID, scopeRegion := parseOpsAlertRuleScope(rule.Filters)
-		if strings.TrimSpace(rule.MetricType) == "group_codex_5h_usage_percent" && strings.TrimSpace(scopePlatform) == "" {
+		if isGroupCodex5hMetric(rule.MetricType) && strings.TrimSpace(scopePlatform) == "" {
 			scopePlatform = PlatformOpenAI
 		}
 
@@ -524,7 +524,7 @@ func (s *OpsAlertEvaluatorService) computeRuleMetric(
 			return 0, true
 		}
 		return (float64(availability.Group.RateLimitCount) / float64(availability.Group.TotalAccounts)) * 100, true
-	case "group_codex_5h_usage_percent":
+	case "group_codex_5h_usage_percent", "group_codex_5h_remaining_percent":
 		if groupID == nil || *groupID <= 0 {
 			return 0, false
 		}
@@ -537,6 +537,9 @@ func (s *OpsAlertEvaluatorService) computeRuleMetric(
 		accounts, err := s.opsService.accountRepo.ListSchedulableByGroupIDAndPlatform(ctx, *groupID, platform)
 		if err != nil {
 			return 0, false
+		}
+		if strings.TrimSpace(rule.MetricType) == "group_codex_5h_remaining_percent" {
+			return computeGroupCodex5hRemainingPercent(accounts, end)
 		}
 		return computeGroupCodex5hUsagePercent(accounts, end)
 	case "account_error_ratio":
@@ -1053,6 +1056,15 @@ func countAccountsByCondition(accounts map[int64]*AccountAvailability, condition
 	return count
 }
 
+func isGroupCodex5hMetric(metricType string) bool {
+	switch strings.TrimSpace(metricType) {
+	case "group_codex_5h_usage_percent", "group_codex_5h_remaining_percent":
+		return true
+	default:
+		return false
+	}
+}
+
 func computeGroupCodex5hUsagePercent(accounts []Account, now time.Time) (float64, bool) {
 	if now.IsZero() {
 		now = time.Now().UTC()
@@ -1083,4 +1095,19 @@ func computeGroupCodex5hUsagePercent(accounts []Account, now time.Time) (float64
 		return 0, false
 	}
 	return weightedUsed / totalWeight, true
+}
+
+func computeGroupCodex5hRemainingPercent(accounts []Account, now time.Time) (float64, bool) {
+	usage, ok := computeGroupCodex5hUsagePercent(accounts, now)
+	if !ok {
+		return 0, false
+	}
+	remaining := 100 - usage
+	if remaining < 0 {
+		return 0, true
+	}
+	if remaining > 100 {
+		return 100, true
+	}
+	return remaining, true
 }

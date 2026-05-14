@@ -60,7 +60,8 @@ const groupMetricTypes = new Set<MetricType>([
   'group_available_accounts',
   'group_available_ratio',
   'group_rate_limit_ratio',
-  'group_codex_5h_usage_percent'
+  'group_codex_5h_usage_percent',
+  'group_codex_5h_remaining_percent'
 ])
 
 function parsePositiveInt(value: unknown): number | null {
@@ -202,6 +203,15 @@ const metricDefinitions = computed(() => {
       description: t('admin.ops.alertRules.metricDescriptions.groupCodex5hUsagePercent'),
       recommendedOperator: '>=',
       recommendedThreshold: 90,
+      unit: '%'
+    },
+    {
+      type: 'group_codex_5h_remaining_percent',
+      group: 'group',
+      label: t('admin.ops.alertRules.metrics.groupCodex5hRemainingPercent'),
+      description: t('admin.ops.alertRules.metricDescriptions.groupCodex5hRemainingPercent'),
+      recommendedOperator: '<=',
+      recommendedThreshold: 10,
       unit: '%'
     },
 

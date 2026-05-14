@@ -27,6 +27,7 @@ var validOpsAlertMetricTypes = []string{
 	"group_available_ratio",
 	"group_rate_limit_ratio",
 	"group_codex_5h_usage_percent",
+	"group_codex_5h_remaining_percent",
 	"account_rate_limited_count",
 	"account_error_count",
 	"account_error_ratio",
@@ -96,6 +97,7 @@ func isPercentOrRateMetric(metricType string) bool {
 		"group_available_ratio",
 		"group_rate_limit_ratio",
 		"group_codex_5h_usage_percent",
+		"group_codex_5h_remaining_percent",
 		"account_error_ratio":
 		return true
 	default:
