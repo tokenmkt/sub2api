@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand/v2"
 	"net/http"
@@ -150,6 +151,29 @@ func (e *ConcurrencyError) Error() string {
 		return fmt.Sprintf("timeout waiting for %s concurrency slot", e.SlotType)
 	}
 	return fmt.Sprintf("%s concurrency limit reached", e.SlotType)
+}
+
+const statusClientClosedRequest = 499
+
+func mapConcurrencyAcquireError(err error, fallbackSlotType string) (status int, errType string, message string) {
+	if errors.Is(err, context.Canceled) {
+		return statusClientClosedRequest, "client_canceled", "Client closed request"
+	}
+	if errors.Is(err, context.DeadlineExceeded) {
+		return http.StatusGatewayTimeout, "request_timeout", "Request timed out while acquiring concurrency slot"
+	}
+
+	var concurrencyErr *ConcurrencyError
+	if errors.As(err, &concurrencyErr) {
+		slotType := fallbackSlotType
+		if concurrencyErr.SlotType != "" {
+			slotType = concurrencyErr.SlotType
+		}
+		return http.StatusTooManyRequests, "rate_limit_error",
+			fmt.Sprintf("Concurrency limit exceeded for %s, please retry later", slotType)
+	}
+
+	return http.StatusServiceUnavailable, "api_error", "Concurrency service temporarily unavailable"
 }
 
 // ConcurrencyHelper provides common concurrency slot management for gateway handlers
@@ -336,6 +360,9 @@ func (h *ConcurrencyHelper) waitForSlotWithPingTimeout(c *gin.Context, slotType 
 	for {
 		select {
 		case <-ctx.Done():
+			if requestErr := c.Request.Context().Err(); requestErr != nil {
+				return nil, requestErr
+			}
 			return nil, &ConcurrencyError{
 				SlotType:  slotType,
 				IsTimeout: true,
