@@ -2,11 +2,14 @@ package handler
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
 
@@ -123,4 +126,27 @@ func TestConcurrencyHelper_TryAcquireAccountSlot_NotAcquired(t *testing.T) {
 	require.False(t, acquired)
 	require.Nil(t, release)
 	require.Equal(t, int32(0), atomic.LoadInt32(&cache.releaseAccountCalled))
+}
+
+func TestConcurrencyHelper_WaitForUserSlotReturnsClientCancellation(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	req := httptest.NewRequest(http.MethodPost, "/responses", nil)
+	ctx, cancel := context.WithCancel(req.Context())
+	cancel()
+	c.Request = req.WithContext(ctx)
+
+	cache := &concurrencyCacheMock{
+		acquireUserSlotFn: func(ctx context.Context, userID int64, maxConcurrency int, requestID string) (bool, error) {
+			return false, nil
+		},
+	}
+	helper := NewConcurrencyHelper(service.NewConcurrencyService(cache), SSEPingFormatNone, time.Second)
+	streamStarted := false
+
+	release, err := helper.AcquireUserSlotWithWait(c, 101, 1, false, &streamStarted)
+
+	require.Nil(t, release)
+	require.ErrorIs(t, err, context.Canceled)
 }

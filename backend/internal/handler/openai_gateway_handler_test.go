@@ -131,6 +131,34 @@ func TestOpenAIHandleStreamingAwareError_NonStreaming(t *testing.T) {
 	assert.Equal(t, "test error", errorObj["message"])
 }
 
+func TestOpenAIHandleConcurrencyError_ClassifiesClientCancel(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest(http.MethodPost, "/responses", nil)
+
+	h := &OpenAIGatewayHandler{}
+	h.handleConcurrencyError(c, context.Canceled, "user", false)
+
+	require.Equal(t, 499, w.Code)
+	require.Equal(t, "client_canceled", gjson.GetBytes(w.Body.Bytes(), "error.type").String())
+	require.NotContains(t, w.Body.String(), "Concurrency limit exceeded")
+}
+
+func TestOpenAIHandleConcurrencyError_ClassifiesConcurrencyBackendFailure(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest(http.MethodPost, "/responses", nil)
+
+	h := &OpenAIGatewayHandler{}
+	h.handleConcurrencyError(c, errors.New("redis unavailable"), "user", false)
+
+	require.Equal(t, http.StatusServiceUnavailable, w.Code)
+	require.Equal(t, "api_error", gjson.GetBytes(w.Body.Bytes(), "error.type").String())
+	require.NotContains(t, w.Body.String(), "Concurrency limit exceeded")
+}
+
 func TestReadRequestBodyWithPrealloc(t *testing.T) {
 	payload := `{"model":"gpt-5","input":"hello"}`
 	req := httptest.NewRequest(http.MethodPost, "/v1/responses", strings.NewReader(payload))
