@@ -42,6 +42,9 @@
                 <p class="text-xl font-bold text-gray-900 dark:text-white">
                   {{ stats.total_accounts }}
                 </p>
+                <p class="text-xs font-medium text-teal-600 dark:text-teal-400">
+                  ${{ formatCost(stats.total_available_account_quota || 0) }} {{ t('admin.dashboard.availableQuota') }}
+                </p>
                 <p class="text-xs">
                   <span class="text-green-600 dark:text-green-400"
                     >{{ stats.normal_accounts }} {{ t('common.active') }}</span

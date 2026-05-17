@@ -63,6 +63,7 @@ const createDashboardStats = (): DashboardStats => ({
   error_accounts: 0,
   ratelimit_accounts: 0,
   overload_accounts: 0,
+  total_available_account_quota: 0,
   total_requests: 0,
   total_input_tokens: 0,
   total_output_tokens: 0,
@@ -79,6 +80,8 @@ const createDashboardStats = (): DashboardStats => ({
   today_tokens: 0,
   today_cost: 0,
   today_actual_cost: 0,
+  total_account_cost: 0,
+  today_account_cost: 0,
   average_duration_ms: 0,
   uptime: 0,
   rpm: 0,
@@ -139,5 +142,38 @@ describe('admin DashboardView', () => {
       end_date: formatLocalDate(now),
       granularity: 'hour'
     }))
+  })
+
+  it('shows total available account quota in the account card', async () => {
+    getSnapshotV2.mockResolvedValueOnce({
+      stats: {
+        ...createDashboardStats(),
+        total_accounts: 50,
+        normal_accounts: 10,
+        error_accounts: 40,
+        total_available_account_quota: 465.685
+      },
+      trend: [],
+      models: []
+    })
+
+    const wrapper = mount(DashboardView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          LoadingSpinner: true,
+          Icon: true,
+          DateRangePicker: true,
+          Select: true,
+          ModelDistributionChart: true,
+          TokenUsageTrend: true,
+          Line: true
+        }
+      }
+    })
+
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('$465.69 admin.dashboard.availableQuota')
   })
 })
