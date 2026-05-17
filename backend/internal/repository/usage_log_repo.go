@@ -1499,30 +1499,62 @@ func (r *usageLogRepository) fillDashboardEntityStats(ctx context.Context, stats
 			COUNT(CASE WHEN rate_limited_at IS NOT NULL AND rate_limit_reset_at > $3 THEN 1 END) as ratelimit_accounts,
 			COUNT(CASE WHEN overload_until IS NOT NULL AND overload_until > $4 THEN 1 END) as overload_accounts,
 			(
-				SELECT COALESCE(SUM(GREATEST(account_window.limit_usd - account_window.current_cost, 0)), 0)
+				SELECT COALESCE(SUM(
+					CASE
+						WHEN account_windows.used_fraction > 0
+							AND account_windows.current_cost > 0
+						THEN (account_windows.current_cost / account_windows.used_fraction) * (1 - account_windows.used_fraction)
+						ELSE 0
+					END
+				), 0)
 				FROM (
 					SELECT
 						a.id,
-						COALESCE((a.extra->>'window_cost_limit')::numeric, 0) as limit_usd,
-						COALESCE(SUM(ul.total_cost), 0) as current_cost
+						LEAST(GREATEST(
+							CASE
+								WHEN a.platform = $5 AND a.type IN ($6, $7) THEN
+									CASE
+										WHEN a.session_window_end IS NULL OR NOW() >= a.session_window_end THEN 0
+										WHEN COALESCE(a.extra->>'session_window_utilization', '') ~ '^-?[0-9]+(\.[0-9]+)?$'
+										THEN (a.extra->>'session_window_utilization')::numeric
+										WHEN a.session_window_status = 'rejected' THEN 1
+										WHEN a.session_window_status = 'allowed_warning' THEN 0.8
+										ELSE 0
+									END
+								WHEN a.platform = $8 AND a.type = $6 THEN
+									CASE
+										WHEN COALESCE(a.extra->>'codex_5h_used_percent', '') !~ '^-?[0-9]+(\.[0-9]+)?$' THEN 0
+										WHEN a.extra ? 'codex_5h_reset_at'
+											AND (a.extra->>'codex_5h_reset_at') ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}T'
+											AND (a.extra->>'codex_5h_reset_at')::timestamptz <= NOW() THEN 0
+										ELSE ((a.extra->>'codex_5h_used_percent')::numeric / 100)
+									END
+								ELSE 0
+							END,
+						0), 1) as used_fraction,
+						COALESCE(SUM(COALESCE(ul.account_stats_cost, ul.total_cost) * COALESCE(ul.account_rate_multiplier, 1)), 0) as current_cost
 					FROM accounts a
 					LEFT JOIN usage_logs ul
 						ON ul.account_id = a.id
 						AND ul.created_at >= CASE
-							WHEN a.session_window_start IS NOT NULL
+							WHEN a.platform = $5
+								AND a.session_window_start IS NOT NULL
 								AND a.session_window_end IS NOT NULL
 								AND NOW() < a.session_window_end
 							THEN a.session_window_start
+							WHEN a.platform = $8
+							THEN NOW() - INTERVAL '5 hours'
 							ELSE date_trunc('hour', NOW())
 						END
 					WHERE a.deleted_at IS NULL
 						AND a.status = $1
 						AND a.schedulable = true
-						AND a.platform = $5
-						AND a.type IN ($6, $7)
-						AND COALESCE((a.extra->>'window_cost_limit')::numeric, 0) > 0
-					GROUP BY a.id, limit_usd
-				) account_window
+						AND (
+							(a.platform = $5 AND a.type IN ($6, $7))
+							OR (a.platform = $8 AND a.type = $6)
+						)
+					GROUP BY a.id, used_fraction
+				) account_windows
 			) as total_available_account_quota
 		FROM accounts
 		WHERE deleted_at IS NULL
@@ -1539,6 +1571,7 @@ func (r *usageLogRepository) fillDashboardEntityStats(ctx context.Context, stats
 			service.PlatformAnthropic,
 			service.AccountTypeOAuth,
 			service.AccountTypeSetupToken,
+			service.PlatformOpenAI,
 		},
 		&stats.TotalAccounts,
 		&stats.NormalAccounts,
