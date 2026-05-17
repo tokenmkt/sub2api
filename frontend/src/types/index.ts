@@ -1255,6 +1255,7 @@ export interface DashboardStats {
   error_accounts: number // 异常账户数
   ratelimit_accounts: number // 限流账户数
   overload_accounts: number // 过载账户数
+  total_available_account_quota: number // 启用可调度账号的剩余有限额度（USD）
 
   // 累计 Token 使用统计
   total_requests: number

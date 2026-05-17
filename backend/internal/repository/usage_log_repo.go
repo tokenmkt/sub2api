@@ -1497,7 +1497,19 @@ func (r *usageLogRepository) fillDashboardEntityStats(ctx context.Context, stats
 			COUNT(CASE WHEN status = $1 AND schedulable = true THEN 1 END) as normal_accounts,
 			COUNT(CASE WHEN status = $2 THEN 1 END) as error_accounts,
 			COUNT(CASE WHEN rate_limited_at IS NOT NULL AND rate_limit_reset_at > $3 THEN 1 END) as ratelimit_accounts,
-			COUNT(CASE WHEN overload_until IS NOT NULL AND overload_until > $4 THEN 1 END) as overload_accounts
+			COUNT(CASE WHEN overload_until IS NOT NULL AND overload_until > $4 THEN 1 END) as overload_accounts,
+			COALESCE(SUM(
+				CASE
+					WHEN status = $1
+						AND schedulable = true
+						AND COALESCE((extra->>'quota_limit')::numeric, 0) > 0
+					THEN GREATEST(
+						COALESCE((extra->>'quota_limit')::numeric, 0) - COALESCE((extra->>'quota_used')::numeric, 0),
+						0
+					)
+					ELSE 0
+				END
+			), 0) as total_available_account_quota
 		FROM accounts
 		WHERE deleted_at IS NULL
 	`
@@ -1511,6 +1523,7 @@ func (r *usageLogRepository) fillDashboardEntityStats(ctx context.Context, stats
 		&stats.ErrorAccounts,
 		&stats.RateLimitAccounts,
 		&stats.OverloadAccounts,
+		&stats.TotalAvailableAccountQuota,
 	); err != nil {
 		return err
 	}

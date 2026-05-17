@@ -677,6 +677,31 @@ func (s *UsageLogRepoSuite) TestDashboardStats_TodayTotalsAndPerformance() {
 	mustCreateAccount(s.T(), s.client, &service.Account{Name: "a-error", Status: service.StatusError, Schedulable: true})
 	mustCreateAccount(s.T(), s.client, &service.Account{Name: "a-rl", RateLimitedAt: &now, RateLimitResetAt: &resetAt, Schedulable: true})
 	mustCreateAccount(s.T(), s.client, &service.Account{Name: "a-ov", OverloadUntil: &resetAt, Schedulable: true})
+	mustCreateAccount(s.T(), s.client, &service.Account{
+		Name:        "a-quota",
+		Schedulable: true,
+		Extra: map[string]any{
+			"quota_limit": 125.5,
+			"quota_used":  25.25,
+		},
+	})
+	mustCreateAccount(s.T(), s.client, &service.Account{
+		Name:        "a-quota-exhausted",
+		Schedulable: true,
+		Extra: map[string]any{
+			"quota_limit": 10.0,
+			"quota_used":  11.0,
+		},
+	})
+	mustCreateAccount(s.T(), s.client, &service.Account{
+		Name:        "a-quota-disabled",
+		Status:      service.StatusDisabled,
+		Schedulable: true,
+		Extra: map[string]any{
+			"quota_limit": 99.0,
+			"quota_used":  1.0,
+		},
+	})
 
 	d1, d2, d3 := 100, 200, 300
 	logToday := &service.UsageLog{
@@ -740,10 +765,11 @@ func (s *UsageLogRepoSuite) TestDashboardStats_TodayTotalsAndPerformance() {
 	s.Require().Equal(baseStats.ActiveUsers+1, stats.ActiveUsers, "ActiveUsers mismatch")
 	s.Require().Equal(baseStats.TotalAPIKeys+2, stats.TotalAPIKeys, "TotalAPIKeys mismatch")
 	s.Require().Equal(baseStats.ActiveAPIKeys+1, stats.ActiveAPIKeys, "ActiveAPIKeys mismatch")
-	s.Require().Equal(baseStats.TotalAccounts+4, stats.TotalAccounts, "TotalAccounts mismatch")
+	s.Require().Equal(baseStats.TotalAccounts+7, stats.TotalAccounts, "TotalAccounts mismatch")
 	s.Require().Equal(baseStats.ErrorAccounts+1, stats.ErrorAccounts, "ErrorAccounts mismatch")
 	s.Require().Equal(baseStats.RateLimitAccounts+1, stats.RateLimitAccounts, "RateLimitAccounts mismatch")
 	s.Require().Equal(baseStats.OverloadAccounts+1, stats.OverloadAccounts, "OverloadAccounts mismatch")
+	s.Require().InDelta(baseStats.TotalAvailableAccountQuota+100.25, stats.TotalAvailableAccountQuota, 0.000001, "TotalAvailableAccountQuota mismatch")
 
 	s.Require().Equal(baseStats.TotalRequests+3, stats.TotalRequests, "TotalRequests mismatch")
 	s.Require().Equal(baseStats.TotalInputTokens+int64(16), stats.TotalInputTokens, "TotalInputTokens mismatch")

@@ -1365,6 +1365,7 @@ export default {
       accounts: '账号',
       totalAccounts: '账号总数',
       activeAccounts: '活跃账号',
+      availableQuota: '总可用额度',
       todayRequests: '今日请求',
       totalRequests: '总请求数',
       todayCost: '今日消费',
