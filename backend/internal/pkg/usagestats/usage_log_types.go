@@ -48,7 +48,7 @@ type DashboardStats struct {
 	ErrorAccounts     int64 `json:"error_accounts"`     // 异常账户数 (status=error)
 	RateLimitAccounts int64 `json:"ratelimit_accounts"` // 限流账户数
 	OverloadAccounts  int64 `json:"overload_accounts"`  // 过载账户数
-	// 启用且可调度账号的有限总额度剩余量（美元），未配置总额度的账号不计入
+	// 启用且可调度账号的 5h 窗口剩余额度（美元），未配置 5h 窗口费用限制的账号不计入
 	TotalAvailableAccountQuota float64 `json:"total_available_account_quota"`
 
 	// 累计 Token 使用统计

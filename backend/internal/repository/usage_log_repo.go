@@ -1498,18 +1498,32 @@ func (r *usageLogRepository) fillDashboardEntityStats(ctx context.Context, stats
 			COUNT(CASE WHEN status = $2 THEN 1 END) as error_accounts,
 			COUNT(CASE WHEN rate_limited_at IS NOT NULL AND rate_limit_reset_at > $3 THEN 1 END) as ratelimit_accounts,
 			COUNT(CASE WHEN overload_until IS NOT NULL AND overload_until > $4 THEN 1 END) as overload_accounts,
-			COALESCE(SUM(
-				CASE
-					WHEN status = $1
-						AND schedulable = true
-						AND COALESCE((extra->>'quota_limit')::numeric, 0) > 0
-					THEN GREATEST(
-						COALESCE((extra->>'quota_limit')::numeric, 0) - COALESCE((extra->>'quota_used')::numeric, 0),
-						0
-					)
-					ELSE 0
-				END
-			), 0) as total_available_account_quota
+			(
+				SELECT COALESCE(SUM(GREATEST(account_window.limit_usd - account_window.current_cost, 0)), 0)
+				FROM (
+					SELECT
+						a.id,
+						COALESCE((a.extra->>'window_cost_limit')::numeric, 0) as limit_usd,
+						COALESCE(SUM(ul.total_cost), 0) as current_cost
+					FROM accounts a
+					LEFT JOIN usage_logs ul
+						ON ul.account_id = a.id
+						AND ul.created_at >= CASE
+							WHEN a.session_window_start IS NOT NULL
+								AND a.session_window_end IS NOT NULL
+								AND NOW() < a.session_window_end
+							THEN a.session_window_start
+							ELSE date_trunc('hour', NOW())
+						END
+					WHERE a.deleted_at IS NULL
+						AND a.status = $1
+						AND a.schedulable = true
+						AND a.platform = $5
+						AND a.type IN ($6, $7)
+						AND COALESCE((a.extra->>'window_cost_limit')::numeric, 0) > 0
+					GROUP BY a.id, limit_usd
+				) account_window
+			) as total_available_account_quota
 		FROM accounts
 		WHERE deleted_at IS NULL
 	`
@@ -1517,7 +1531,15 @@ func (r *usageLogRepository) fillDashboardEntityStats(ctx context.Context, stats
 		ctx,
 		r.sql,
 		accountStatsQuery,
-		[]any{service.StatusActive, service.StatusError, now, now},
+		[]any{
+			service.StatusActive,
+			service.StatusError,
+			now,
+			now,
+			service.PlatformAnthropic,
+			service.AccountTypeOAuth,
+			service.AccountTypeSetupToken,
+		},
 		&stats.TotalAccounts,
 		&stats.NormalAccounts,
 		&stats.ErrorAccounts,

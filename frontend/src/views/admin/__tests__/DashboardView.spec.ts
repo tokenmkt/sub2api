@@ -144,7 +144,7 @@ describe('admin DashboardView', () => {
     }))
   })
 
-  it('shows total available account quota in the account card', async () => {
+  it('shows total 5h remaining account quota in the account card', async () => {
     getSnapshotV2.mockResolvedValueOnce({
       stats: {
         ...createDashboardStats(),
