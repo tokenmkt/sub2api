@@ -680,42 +680,63 @@ func (s *UsageLogRepoSuite) TestDashboardStats_TodayTotalsAndPerformance() {
 	windowStart := now.Add(-30 * time.Minute)
 	windowEnd := now.Add(4*time.Hour + 30*time.Minute)
 	mustCreateAccount(s.T(), s.client, &service.Account{
-		Name:        "a-quota",
+		Name:               "a-claude-unused",
+		Schedulable:        true,
+		SessionWindowStart: &windowStart,
+		SessionWindowEnd:   &windowEnd,
+	})
+	mustCreateAccount(s.T(), s.client, &service.Account{
+		Name:        "a-claude-partial",
 		Schedulable: true,
 		Extra: map[string]any{
-			"window_cost_limit": 125.5,
+			"session_window_utilization": 0.25,
 		},
 		SessionWindowStart: &windowStart,
 		SessionWindowEnd:   &windowEnd,
 	})
 	mustCreateAccount(s.T(), s.client, &service.Account{
-		Name:        "a-quota-small-unused",
-		Schedulable: true,
-		Extra: map[string]any{
-			"window_cost_limit": 10.0,
-		},
+		Name:               "a-claude-disabled",
+		Status:             service.StatusDisabled,
+		Schedulable:        true,
 		SessionWindowStart: &windowStart,
 		SessionWindowEnd:   &windowEnd,
 	})
 	mustCreateAccount(s.T(), s.client, &service.Account{
-		Name:        "a-quota-disabled",
-		Status:      service.StatusDisabled,
+		Name:        "a-gpt-partial",
+		Platform:    service.PlatformOpenAI,
+		Type:        service.AccountTypeOAuth,
 		Schedulable: true,
 		Extra: map[string]any{
-			"window_cost_limit": 99.0,
+			"codex_5h_used_percent": 40.0,
+			"codex_5h_reset_at":     now.Add(2 * time.Hour).UTC().Format(time.RFC3339),
 		},
+	})
+	accGPTWindow := mustCreateAccount(s.T(), s.client, &service.Account{
+		Name:        "a-gpt-window-cost",
+		Platform:    service.PlatformOpenAI,
+		Type:        service.AccountTypeOAuth,
+		Schedulable: true,
+		Extra: map[string]any{
+			"codex_5h_used_percent": 40.0,
+			"codex_5h_reset_at":     now.Add(2 * time.Hour).UTC().Format(time.RFC3339),
+		},
+	})
+	accClaudeWindow := mustCreateAccount(s.T(), s.client, &service.Account{
+		Name:               "a-claude-window-cost",
+		Schedulable:        true,
+		Extra:              map[string]any{"session_window_utilization": 0.25},
 		SessionWindowStart: &windowStart,
 		SessionWindowEnd:   &windowEnd,
 	})
-
-	accWindowUsed := mustCreateAccount(s.T(), s.client, &service.Account{
-		Name:        "a-quota-window-used",
+	mustCreateAccount(s.T(), s.client, &service.Account{
+		Name:        "a-gpt-expired",
+		Platform:    service.PlatformOpenAI,
+		Type:        service.AccountTypeOAuth,
 		Schedulable: true,
 		Extra: map[string]any{
-			"window_cost_limit": 125.5,
+			"codex_5h_used_percent": 80.0,
+			"codex_5h_reset_at":     now.Add(-1 * time.Hour).UTC().Format(time.RFC3339),
 		},
-		SessionWindowStart: &windowStart,
-		SessionWindowEnd:   &windowEnd,
 	})
 
 	d1, d2, d3 := 100, 200, 300
@@ -767,17 +788,29 @@ func (s *UsageLogRepoSuite) TestDashboardStats_TodayTotalsAndPerformance() {
 	_, err = s.repo.Create(s.ctx, logPerf)
 	s.Require().NoError(err, "Create logPerf")
 
-	logWindowCost := &service.UsageLog{
+	logGPTWindowCost := &service.UsageLog{
 		UserID:     userToday.ID,
 		APIKeyID:   apiKey1.ID,
-		AccountID:  accWindowUsed.ID,
+		AccountID:  accGPTWindow.ID,
+		Model:      "gpt-5",
+		TotalCost:  20,
+		ActualCost: 20,
+		CreatedAt:  now.Add(-90 * time.Minute),
+	}
+	_, err = s.repo.Create(s.ctx, logGPTWindowCost)
+	s.Require().NoError(err, "Create logGPTWindowCost")
+
+	logClaudeWindowCost := &service.UsageLog{
+		UserID:     userToday.ID,
+		APIKeyID:   apiKey1.ID,
+		AccountID:  accClaudeWindow.ID,
 		Model:      "claude-3",
-		TotalCost:  25.25,
-		ActualCost: 25.25,
+		TotalCost:  10,
+		ActualCost: 10,
 		CreatedAt:  now.Add(-10 * time.Minute),
 	}
-	_, err = s.repo.Create(s.ctx, logWindowCost)
-	s.Require().NoError(err, "Create logWindowCost")
+	_, err = s.repo.Create(s.ctx, logClaudeWindowCost)
+	s.Require().NoError(err, "Create logClaudeWindowCost")
 
 	aggRepo := newDashboardAggregationRepositoryWithSQL(s.tx)
 	aggStart := todayStart.Add(-2 * time.Hour)
@@ -792,22 +825,22 @@ func (s *UsageLogRepoSuite) TestDashboardStats_TodayTotalsAndPerformance() {
 	s.Require().Equal(baseStats.ActiveUsers+1, stats.ActiveUsers, "ActiveUsers mismatch")
 	s.Require().Equal(baseStats.TotalAPIKeys+2, stats.TotalAPIKeys, "TotalAPIKeys mismatch")
 	s.Require().Equal(baseStats.ActiveAPIKeys+1, stats.ActiveAPIKeys, "ActiveAPIKeys mismatch")
-	s.Require().Equal(baseStats.TotalAccounts+8, stats.TotalAccounts, "TotalAccounts mismatch")
+	s.Require().Equal(baseStats.TotalAccounts+11, stats.TotalAccounts, "TotalAccounts mismatch")
 	s.Require().Equal(baseStats.ErrorAccounts+1, stats.ErrorAccounts, "ErrorAccounts mismatch")
 	s.Require().Equal(baseStats.RateLimitAccounts+1, stats.RateLimitAccounts, "RateLimitAccounts mismatch")
 	s.Require().Equal(baseStats.OverloadAccounts+1, stats.OverloadAccounts, "OverloadAccounts mismatch")
-	s.Require().InDelta(baseStats.TotalAvailableAccountQuota+235.75, stats.TotalAvailableAccountQuota, 0.000001, "TotalAvailableAccountQuota mismatch")
+	s.Require().InDelta(baseStats.TotalAvailableAccountQuota+60.0, stats.TotalAvailableAccountQuota, 0.000001, "TotalAvailableAccountQuota mismatch")
 
-	s.Require().Equal(baseStats.TotalRequests+4, stats.TotalRequests, "TotalRequests mismatch")
+	s.Require().Equal(baseStats.TotalRequests+5, stats.TotalRequests, "TotalRequests mismatch")
 	s.Require().Equal(baseStats.TotalInputTokens+int64(16), stats.TotalInputTokens, "TotalInputTokens mismatch")
 	s.Require().Equal(baseStats.TotalOutputTokens+int64(28), stats.TotalOutputTokens, "TotalOutputTokens mismatch")
 	s.Require().Equal(baseStats.TotalCacheCreationTokens+int64(3), stats.TotalCacheCreationTokens, "TotalCacheCreationTokens mismatch")
 	s.Require().Equal(baseStats.TotalCacheReadTokens+int64(4), stats.TotalCacheReadTokens, "TotalCacheReadTokens mismatch")
 	s.Require().Equal(baseStats.TotalTokens+int64(51), stats.TotalTokens, "TotalTokens mismatch")
-	s.Require().Equal(baseStats.TotalCost+27.55, stats.TotalCost, "TotalCost mismatch")
-	s.Require().Equal(baseStats.TotalActualCost+27.25, stats.TotalActualCost, "TotalActualCost mismatch")
+	s.Require().Equal(baseStats.TotalCost+32.3, stats.TotalCost, "TotalCost mismatch")
+	s.Require().Equal(baseStats.TotalActualCost+32.0, stats.TotalActualCost, "TotalActualCost mismatch")
 	// account_cost falls back to total_cost when account_stats_cost is NULL
-	s.Require().Equal(baseStats.TotalAccountCost+27.55, stats.TotalAccountCost, "TotalAccountCost mismatch")
+	s.Require().Equal(baseStats.TotalAccountCost+32.3, stats.TotalAccountCost, "TotalAccountCost mismatch")
 	s.Require().GreaterOrEqual(stats.TodayRequests, int64(1), "expected TodayRequests >= 1")
 	s.Require().GreaterOrEqual(stats.TodayCost, 0.0, "expected TodayCost >= 0")
 	s.Require().GreaterOrEqual(stats.TodayAccountCost, 0.0, "expected TodayAccountCost >= 0")
