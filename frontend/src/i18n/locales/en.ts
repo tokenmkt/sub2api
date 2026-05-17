@@ -1355,7 +1355,7 @@ export default {
       description: 'System overview and real-time statistics',
       apiKeys: 'API Keys',
       accounts: 'Accounts',
-      availableQuota: 'total available quota',
+      availableQuota: '5h remaining quota',
       users: 'Users',
       todayRequests: 'Today Requests',
       newUsersToday: 'New Users Today',
