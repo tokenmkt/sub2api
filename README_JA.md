@@ -71,8 +71,8 @@ tokenMKT は、AI 製品のサブスクリプションから API クォータを
 </tr>
 
 <tr>
-<td width="180"><a href="https://code.silkapi.com/"><img src="assets/partners/logos/silkapi.png" alt="silkapi" width="150"></a></td>
-<td>SilkAPI のご支援に感謝します！<a href="https://code.silkapi.com/">SilkAPI</a> は tokenMKT をベースに構築された中継サービスで、高速かつ安定した Codex API 中継の提供に特化しています。</td>
+<td width="180"><a href="https://code.silkapi.com/register?aff=SUB2API"><img src="assets/partners/logos/silkapi.png" alt="silkapi" width="150"></a></td>
+<td>SilkAPI のご支援に感謝します！<a href="https://code.silkapi.com/register?aff=SUB2API">SilkAPI</a> は tokenMKT をベースに構築された中継サービスで、高速かつ安定した Codex API 中継の提供に特化しています。</td>
 </tr>
 
 <tr>

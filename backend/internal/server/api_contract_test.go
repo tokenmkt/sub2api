@@ -652,6 +652,15 @@ func TestAPIContracts(t *testing.T) {
 					"totp_encryption_key_configured": false,
 					"email_provider": "smtp",
 					"resend_api_key_configured": false,
+					"login_agreement_enabled": false,
+					"login_agreement_mode": "modal",
+					"login_agreement_updated_at": "2026-03-31",
+					"login_agreement_documents": [
+						{"id": "terms", "title": "服务条款", "content_md": ""},
+						{"id": "usage-policy", "title": "使用政策", "content_md": ""},
+						{"id": "supported-regions", "title": "支持的国家和地区", "content_md": ""},
+						{"id": "service-specific-terms", "title": "服务特定条款", "content_md": ""}
+					],
 					"smtp_host": "smtp.example.com",
 					"smtp_port": 587,
 					"smtp_username": "user",
@@ -688,6 +697,16 @@ func TestAPIContracts(t *testing.T) {
 						"oidc_connect_userinfo_email_path": "",
 						"oidc_connect_userinfo_id_path": "",
 						"oidc_connect_userinfo_username_path": "",
+						"github_oauth_enabled": false,
+						"github_oauth_client_id": "",
+						"github_oauth_client_secret_configured": false,
+						"github_oauth_redirect_url": "",
+						"github_oauth_frontend_redirect_url": "/auth/oauth/callback",
+						"google_oauth_enabled": false,
+						"google_oauth_client_id": "",
+						"google_oauth_client_secret_configured": false,
+						"google_oauth_redirect_url": "",
+						"google_oauth_frontend_redirect_url": "/auth/oauth/callback",
 						"ops_monitoring_enabled": false,
 						"ops_realtime_monitoring_enabled": true,
 						"ops_query_mode_default": "auto",
@@ -703,6 +722,16 @@ func TestAPIContracts(t *testing.T) {
 					"auth_source_default_email_subscriptions": [],
 					"auth_source_default_email_grant_on_signup": false,
 					"auth_source_default_email_grant_on_first_bind": false,
+					"auth_source_default_github_balance": 0,
+					"auth_source_default_github_concurrency": 5,
+					"auth_source_default_github_subscriptions": [],
+					"auth_source_default_github_grant_on_signup": false,
+					"auth_source_default_github_grant_on_first_bind": false,
+					"auth_source_default_google_balance": 0,
+					"auth_source_default_google_concurrency": 5,
+					"auth_source_default_google_subscriptions": [],
+					"auth_source_default_google_grant_on_signup": false,
+					"auth_source_default_google_grant_on_first_bind": false,
 					"auth_source_default_linuxdo_balance": 0,
 					"auth_source_default_linuxdo_concurrency": 5,
 					"auth_source_default_linuxdo_subscriptions": [],
@@ -747,6 +776,8 @@ func TestAPIContracts(t *testing.T) {
 					"backend_mode_enabled": false,
 					"enable_cch_signing": false,
 					"enable_anthropic_cache_ttl_1h_injection": false,
+					"rewrite_message_cache_control": false,
+					"antigravity_user_agent_version": "",
 					"enable_fingerprint_unification": true,
 					"enable_metadata_passthrough": false,
 					"web_search_emulation_enabled": false,
@@ -795,6 +826,7 @@ func TestAPIContracts(t *testing.T) {
 					"channel_monitor_enabled": true,
 					"channel_monitor_default_interval_seconds": 60,
 					"available_channels_enabled": false,
+					"risk_control_enabled": false,
 					"affiliate_enabled": false,
 					"wechat_connect_enabled": false,
 					"wechat_connect_app_id": "",
@@ -867,6 +899,15 @@ func TestAPIContracts(t *testing.T) {
 					"totp_encryption_key_configured": false,
 					"email_provider": "smtp",
 					"resend_api_key_configured": false,
+					"login_agreement_enabled": false,
+					"login_agreement_mode": "modal",
+					"login_agreement_updated_at": "2026-03-31",
+					"login_agreement_documents": [
+						{"id": "terms", "title": "服务条款", "content_md": ""},
+						{"id": "usage-policy", "title": "使用政策", "content_md": ""},
+						{"id": "supported-regions", "title": "支持的国家和地区", "content_md": ""},
+						{"id": "service-specific-terms", "title": "服务特定条款", "content_md": ""}
+					],
 					"smtp_host": "",
 					"smtp_port": 587,
 					"smtp_username": "",
@@ -903,6 +944,16 @@ func TestAPIContracts(t *testing.T) {
 					"oidc_connect_userinfo_email_path": "",
 					"oidc_connect_userinfo_id_path": "",
 					"oidc_connect_userinfo_username_path": "",
+					"github_oauth_enabled": false,
+					"github_oauth_client_id": "",
+					"github_oauth_client_secret_configured": false,
+					"github_oauth_redirect_url": "",
+					"github_oauth_frontend_redirect_url": "/auth/oauth/callback",
+					"google_oauth_enabled": false,
+					"google_oauth_client_id": "",
+					"google_oauth_client_secret_configured": false,
+					"google_oauth_redirect_url": "",
+					"google_oauth_frontend_redirect_url": "/auth/oauth/callback",
 					"site_name": "tokenMKT",
 					"site_logo": "",
 					"site_subtitle": "Subscription to API Conversion Platform",
@@ -944,6 +995,8 @@ func TestAPIContracts(t *testing.T) {
 					"enable_metadata_passthrough": false,
 					"enable_cch_signing": false,
 					"enable_anthropic_cache_ttl_1h_injection": false,
+					"rewrite_message_cache_control": false,
+					"antigravity_user_agent_version": "",
 					"web_search_emulation_enabled": false,
 					"payment_visible_method_alipay_source": "",
 					"payment_visible_method_wxpay_source": "",
@@ -988,6 +1041,7 @@ func TestAPIContracts(t *testing.T) {
 					"channel_monitor_enabled": true,
 					"channel_monitor_default_interval_seconds": 60,
 					"available_channels_enabled": false,
+					"risk_control_enabled": false,
 					"affiliate_enabled": false,
 					"wechat_connect_enabled": true,
 					"wechat_connect_app_id": "wx-open-config",
@@ -1010,6 +1064,16 @@ func TestAPIContracts(t *testing.T) {
 					"auth_source_default_email_subscriptions": [],
 					"auth_source_default_email_grant_on_signup": false,
 					"auth_source_default_email_grant_on_first_bind": false,
+					"auth_source_default_github_balance": 0,
+					"auth_source_default_github_concurrency": 5,
+					"auth_source_default_github_subscriptions": [],
+					"auth_source_default_github_grant_on_signup": false,
+					"auth_source_default_github_grant_on_first_bind": false,
+					"auth_source_default_google_balance": 0,
+					"auth_source_default_google_concurrency": 5,
+					"auth_source_default_google_subscriptions": [],
+					"auth_source_default_google_grant_on_signup": false,
+					"auth_source_default_google_grant_on_first_bind": false,
 					"auth_source_default_linuxdo_balance": 0,
 					"auth_source_default_linuxdo_concurrency": 5,
 					"auth_source_default_linuxdo_subscriptions": [],
@@ -1128,7 +1192,7 @@ func newContractDeps(t *testing.T) *contractDeps {
 	subscriptionService := service.NewSubscriptionService(groupRepo, userSubRepo, nil, nil, cfg)
 	subscriptionHandler := handler.NewSubscriptionHandler(subscriptionService)
 
-	redeemService := service.NewRedeemService(redeemRepo, userRepo, subscriptionService, nil, nil, nil, nil)
+	redeemService := service.NewRedeemService(redeemRepo, userRepo, subscriptionService, nil, nil, nil, nil, nil)
 	redeemHandler := handler.NewRedeemHandler(redeemService)
 
 	settingRepo := newStubSettingRepo()
@@ -1298,6 +1362,9 @@ func (r *stubUserRepo) DeductBalance(ctx context.Context, id int64, amount float
 func (r *stubUserRepo) UpdateConcurrency(ctx context.Context, id int64, amount int) error {
 	return errors.New("not implemented")
 }
+
+func (r *stubUserRepo) BatchSetConcurrency(context.Context, []int64, int) (int, error) { return 0, nil }
+func (r *stubUserRepo) BatchAddConcurrency(context.Context, []int64, int) (int, error) { return 0, nil }
 
 func (r *stubUserRepo) ExistsByEmail(ctx context.Context, email string) (bool, error) {
 	return false, errors.New("not implemented")
