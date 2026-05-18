@@ -61,10 +61,10 @@ type feishuMessageCardElement struct {
 }
 
 type feishuMessageCardAction struct {
-	Tag   string                 `json:"tag"`
-	Text  feishuMessageCardText  `json:"text"`
-	Type  string                 `json:"type,omitempty"`
-	Value map[string]interface{} `json:"value,omitempty"`
+	Tag   string                `json:"tag"`
+	Text  feishuMessageCardText `json:"text"`
+	Type  string                `json:"type,omitempty"`
+	Value map[string]any        `json:"value,omitempty"`
 }
 
 func sendFeishuWebhookNotification(ctx context.Context, webhookURL string, title string, body string, cardContext *OpsFeishuAlertCardContext) error {
@@ -114,7 +114,9 @@ func sendFeishuWebhookNotification(ctx context.Context, webhookURL string, title
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
@@ -145,7 +147,7 @@ func buildFeishuAlertCard(title string, body string, ctx *OpsFeishuAlertCardCont
 	if body == "" {
 		body = strings.TrimSpace(title)
 	}
-	value := map[string]interface{}{
+	value := map[string]any{
 		"action":   "resolve_alert",
 		"event_id": ctx.EventID,
 		"rule_id":  ctx.RuleID,

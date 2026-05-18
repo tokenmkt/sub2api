@@ -53,6 +53,35 @@ type UpstreamHTTPTraceRecorder struct {
 	firstResponseObserved bool
 }
 
+type upstreamHTTPTraceSnapshot struct {
+	opts UpstreamHTTPTraceOptions
+
+	method string
+	scheme string
+	host   string
+	path   string
+
+	startTime             time.Time
+	dnsStart              time.Time
+	dnsDone               time.Time
+	connectStart          time.Time
+	connectDone           time.Time
+	tlsStart              time.Time
+	tlsDone               time.Time
+	gotConn               time.Time
+	wroteRequest          time.Time
+	firstResponseByte     time.Time
+	connectionReused      bool
+	connectionWasIdle     bool
+	connectionIdle        time.Duration
+	remoteAddr            string
+	dnsErr                string
+	connectErr            string
+	tlsErr                string
+	wroteRequestErr       string
+	firstResponseObserved bool
+}
+
 func NewUpstreamHTTPTraceRecorder(req *http.Request, opts UpstreamHTTPTraceOptions) *UpstreamHTTPTraceRecorder {
 	if !ShouldSampleUpstreamHTTPTrace() {
 		return nil
@@ -162,7 +191,32 @@ func (r *UpstreamHTTPTraceRecorder) Fields(status int, err error, end time.Time)
 		end = r.now()
 	}
 	r.mu.Lock()
-	snap := *r
+	snap := upstreamHTTPTraceSnapshot{
+		opts:                  r.opts,
+		method:                r.method,
+		scheme:                r.scheme,
+		host:                  r.host,
+		path:                  r.path,
+		startTime:             r.startTime,
+		dnsStart:              r.dnsStart,
+		dnsDone:               r.dnsDone,
+		connectStart:          r.connectStart,
+		connectDone:           r.connectDone,
+		tlsStart:              r.tlsStart,
+		tlsDone:               r.tlsDone,
+		gotConn:               r.gotConn,
+		wroteRequest:          r.wroteRequest,
+		firstResponseByte:     r.firstResponseByte,
+		connectionReused:      r.connectionReused,
+		connectionWasIdle:     r.connectionWasIdle,
+		connectionIdle:        r.connectionIdle,
+		remoteAddr:            r.remoteAddr,
+		dnsErr:                r.dnsErr,
+		connectErr:            r.connectErr,
+		tlsErr:                r.tlsErr,
+		wroteRequestErr:       r.wroteRequestErr,
+		firstResponseObserved: r.firstResponseObserved,
+	}
 	r.mu.Unlock()
 
 	fields := []zap.Field{
