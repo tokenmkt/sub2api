@@ -7189,7 +7189,6 @@ type SettingsForm = Omit<
   resend_api_key: string;
   // 系统全局平台限额 map；form 内始终归一化为全 4 平台对象（模板非空绑定依赖此不变量）
   default_platform_quotas: DefaultPlatformQuotasMap;
-  resend_api_key: string;
 };
 
 const form = reactive<SettingsForm>({
