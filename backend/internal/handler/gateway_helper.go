@@ -128,8 +128,6 @@ func (e *ConcurrencyError) Error() string {
 	return fmt.Sprintf("%s concurrency limit reached", e.SlotType)
 }
 
-const statusClientClosedRequest = 499
-
 func mapConcurrencyAcquireError(err error, fallbackSlotType string) (status int, errType string, message string) {
 	if errors.Is(err, context.Canceled) {
 		return statusClientClosedRequest, "client_canceled", "Client closed request"
