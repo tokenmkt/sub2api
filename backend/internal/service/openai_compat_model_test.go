@@ -1063,7 +1063,7 @@ func TestForwardAsAnthropic_OAuthKeepsSystemAsDeveloperInput(t *testing.T) {
 	require.Equal(t, "project instructions", gjson.GetBytes(upstream.lastBody, "input.0.content.0.text").String())
 	instructions := gjson.GetBytes(upstream.lastBody, "instructions")
 	require.True(t, instructions.Exists())
-	require.Empty(t, instructions.String())
+	require.Contains(t, instructions.String(), "You are Codex")
 	require.Empty(t, upstream.requests[0].Header.Get("OpenAI-Beta"))
 	require.Empty(t, upstream.requests[0].Header.Get("originator"))
 }

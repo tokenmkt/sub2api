@@ -16,6 +16,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/pkg/apicompat"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/openai"
 	"github.com/Wei-Shaw/sub2api/internal/util/responseheaders"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -399,11 +400,12 @@ func ensureCodexOAuthInstructionsField(reqBody map[string]any) {
 		return
 	}
 	if value, ok := reqBody["instructions"]; !ok || value == nil {
-		reqBody["instructions"] = ""
+		reqBody["instructions"] = strings.TrimSpace(openai.DefaultInstructions)
 		return
 	}
-	if _, ok := reqBody["instructions"].(string); !ok {
-		reqBody["instructions"] = ""
+	instructions, ok := reqBody["instructions"].(string)
+	if !ok || strings.TrimSpace(instructions) == "" {
+		reqBody["instructions"] = strings.TrimSpace(openai.DefaultInstructions)
 	}
 }
 
