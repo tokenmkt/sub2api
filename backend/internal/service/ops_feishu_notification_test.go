@@ -165,7 +165,7 @@ func TestMaybeSendAlertEmail_SendsFeishuWebhookWhenConfigured(t *testing.T) {
 	repo.values[SettingKeyOpsEmailNotificationConfig] = string(raw)
 
 	opsSvc := &OpsService{settingRepo: repo}
-	evaluator := NewOpsAlertEvaluatorService(opsSvc, &opsRepoMock{}, nil, nil, nil)
+	evaluator := NewOpsAlertEvaluatorService(opsSvc, &opsRepoMock{}, nil, nil, nil, nil)
 	rule := &OpsAlertRule{ID: 1, Name: "High error rate", Severity: "critical", MetricType: "error_rate", Operator: ">", Threshold: 5, NotifyEmail: true, NotifyFeishu: true}
 	value := 9.2
 	event := &OpsAlertEvent{ID: 10, RuleID: 1, Status: "firing", MetricValue: &value, FiredAt: time.Now().UTC(), Description: "error_rate above threshold"}
@@ -208,7 +208,7 @@ func TestMaybeSendAlertEmail_SendsFeishuWhenEmailDisabledForRule(t *testing.T) {
 	repo.values[SettingKeyOpsEmailNotificationConfig] = string(raw)
 
 	opsSvc := &OpsService{settingRepo: repo}
-	evaluator := NewOpsAlertEvaluatorService(opsSvc, &opsRepoMock{}, nil, nil, nil)
+	evaluator := NewOpsAlertEvaluatorService(opsSvc, &opsRepoMock{}, nil, nil, nil, nil)
 	rule := &OpsAlertRule{ID: 1, Name: "High error rate", Severity: "critical", MetricType: "error_rate", Operator: ">", Threshold: 5, NotifyEmail: false, NotifyFeishu: true}
 	value := 9.2
 	event := &OpsAlertEvent{ID: 10, RuleID: 1, Status: "firing", MetricValue: &value, FiredAt: time.Now().UTC(), Description: "error_rate above threshold"}
@@ -251,7 +251,7 @@ func TestMaybeSendAlertEmail_DoesNotSendFeishuWhenRuleDisablesFeishu(t *testing.
 	repo.values[SettingKeyOpsEmailNotificationConfig] = string(raw)
 
 	opsSvc := &OpsService{settingRepo: repo}
-	evaluator := NewOpsAlertEvaluatorService(opsSvc, &opsRepoMock{}, nil, nil, nil)
+	evaluator := NewOpsAlertEvaluatorService(opsSvc, &opsRepoMock{}, nil, nil, nil, nil)
 	rule := &OpsAlertRule{ID: 1, Name: "High error rate", Severity: "critical", MetricType: "error_rate", Operator: ">", Threshold: 5, NotifyEmail: false, NotifyFeishu: false}
 	value := 9.2
 	event := &OpsAlertEvent{ID: 10, RuleID: 1, Status: "firing", MetricValue: &value, FiredAt: time.Now().UTC(), Description: "error_rate above threshold"}

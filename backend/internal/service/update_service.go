@@ -26,9 +26,10 @@ var (
 )
 
 const (
-	updateCacheKey = "update_check_cache"
-	updateCacheTTL = 1200 // 20 minutes
-	githubRepo     = "Wei-Shaw/sub2api"
+	updateCacheKey    = "update_check_cache"
+	updateCacheTTL    = 1200 // 20 minutes
+	defaultGitHubRepo = "Wei-Shaw/sub2api"
+	updateRepoEnv     = "SUB2API_UPDATE_REPO"
 
 	// Security: allowed download domains for updates
 	allowedDownloadHost = "github.com"
@@ -57,6 +58,7 @@ type UpdateService struct {
 	githubClient   GitHubReleaseClient
 	currentVersion string
 	buildType      string // "source" for manual builds, "release" for CI builds
+	releaseRepo    string
 }
 
 // NewUpdateService creates a new UpdateService
@@ -66,6 +68,7 @@ func NewUpdateService(cache UpdateCache, githubClient GitHubReleaseClient, versi
 		githubClient:   githubClient,
 		currentVersion: version,
 		buildType:      buildType,
+		releaseRepo:    resolveUpdateRepo(),
 	}
 }
 
@@ -280,7 +283,7 @@ func (s *UpdateService) Rollback() error {
 }
 
 func (s *UpdateService) fetchLatestRelease(ctx context.Context) (*UpdateInfo, error) {
-	release, err := s.githubClient.FetchLatestRelease(ctx, githubRepo)
+	release, err := s.githubClient.FetchLatestRelease(ctx, s.releaseRepo)
 	if err != nil {
 		return nil, err
 	}
@@ -310,6 +313,13 @@ func (s *UpdateService) fetchLatestRelease(ctx context.Context) (*UpdateInfo, er
 		Cached:    false,
 		BuildType: s.buildType,
 	}, nil
+}
+
+func resolveUpdateRepo() string {
+	if repo := strings.TrimSpace(os.Getenv(updateRepoEnv)); repo != "" {
+		return repo
+	}
+	return defaultGitHubRepo
 }
 
 func (s *UpdateService) downloadFile(ctx context.Context, downloadURL, dest string) error {

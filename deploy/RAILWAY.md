@@ -41,6 +41,7 @@ SERVER_MODE=release
 RUN_MODE=standard
 TZ=Asia/Shanghai
 DATA_DIR=/app/data
+SUB2API_UPDATE_REPO=tokenmkt/sub2api
 
 DATABASE_HOST=${{sub2api-pg.PGHOST}}
 DATABASE_PORT=${{sub2api-pg.PGPORT}}
