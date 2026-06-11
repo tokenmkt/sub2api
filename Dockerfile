@@ -29,6 +29,7 @@ RUN --mount=type=cache,id=s/ef289601-a6d0-4cbd-8085-6da4bab07c27-/root/.local/sh
 
 # Copy frontend source and build
 COPY frontend/ ./
+COPY docs/legal/ /app/docs/legal/
 RUN pnpm run build
 
 # -----------------------------------------------------------------------------
