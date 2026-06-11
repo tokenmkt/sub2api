@@ -20,7 +20,7 @@ func concurrencyErrorResponse(err error, slotType string) (int, string, string) 
 	}
 
 	if errors.Is(err, context.Canceled) {
-		return statusClientClosedRequest, "client_canceled", "Client closed request"
+		return statusClientClosedRequest, "api_error", "context canceled"
 	}
 
 	return http.StatusServiceUnavailable, "api_error", "Service temporarily unavailable, please retry later"

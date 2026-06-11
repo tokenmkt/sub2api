@@ -143,7 +143,8 @@ func TestOpenAIHandleConcurrencyError_ClassifiesClientCancel(t *testing.T) {
 	h.handleConcurrencyError(c, context.Canceled, "user", false)
 
 	require.Equal(t, 499, w.Code)
-	require.Equal(t, "client_canceled", gjson.GetBytes(w.Body.Bytes(), "error.type").String())
+	require.Equal(t, "api_error", gjson.GetBytes(w.Body.Bytes(), "error.type").String())
+	require.Equal(t, "context canceled", gjson.GetBytes(w.Body.Bytes(), "error.message").String())
 	require.NotContains(t, w.Body.String(), "Concurrency limit exceeded")
 }
 

@@ -31,8 +31,8 @@ func TestConcurrencyErrorResponse(t *testing.T) {
 			err:         context.Canceled,
 			slotType:    "user",
 			wantStatus:  statusClientClosedRequest,
-			wantType:    "client_canceled",
-			wantMessage: "Client closed request",
+			wantType:    "api_error",
+			wantMessage: "context canceled",
 		},
 		{
 			name:        "deadline exceeded is service unavailable",
