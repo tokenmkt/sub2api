@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"html"
 	"log/slog"
 	"math/big"
 	"net"
@@ -597,7 +598,7 @@ func (s *EmailService) buildVerifyCodeEmailBody(code, siteName string) string {
     </div>
 </body>
 </html>
-`, siteName, code)
+`, html.EscapeString(siteName), code)
 }
 
 // TestSMTPConnectionWithConfig 使用指定配置测试SMTP连接
@@ -816,5 +817,5 @@ func (s *EmailService) buildPasswordResetEmailBody(resetURL, siteName string) st
     </div>
 </body>
 </html>
-`, siteName, resetURL, resetURL)
+`, html.EscapeString(siteName), html.EscapeString(resetURL), html.EscapeString(resetURL))
 }
