@@ -14,7 +14,7 @@ func TestRechargePlanCRUDListsOnlyForSalePlans(t *testing.T) {
 		Description:   "External checkout",
 		Price:         100,
 		CreditAmount:  110,
-		OriginalPrice: floatPtr(128),
+		OriginalPrice: rechargeFloatPtr(128),
 		Features:      "Fast delivery\nSupport included",
 		PurchaseURL:   "https://shop.example.com/buy/starter",
 		Badge:         "Recommended",
@@ -81,6 +81,6 @@ func newRechargePlanTestService(t *testing.T) *PaymentConfigService {
 	return &PaymentConfigService{entClient: client}
 }
 
-func floatPtr(v float64) *float64 {
+func rechargeFloatPtr(v float64) *float64 {
 	return &v
 }

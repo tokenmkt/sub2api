@@ -66,7 +66,7 @@ func TestUpdateEmailNotificationConfig_PersistsFeishuWebhook(t *testing.T) {
 func TestSendFeishuWebhookNotification_PostsInteractiveCardPayload(t *testing.T) {
 	var gotContentType string
 	var gotPayload map[string]any
-	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	client := &http.Client{Transport: feishuRoundTripFunc(func(r *http.Request) (*http.Response, error) {
 		gotContentType = r.Header.Get("Content-Type")
 		if r.Method != http.MethodPost {
 			t.Fatalf("method = %s, want POST", r.Method)
@@ -137,7 +137,7 @@ func TestSendFeishuWebhookNotification_PostsInteractiveCardPayload(t *testing.T)
 
 func TestMaybeSendAlertEmail_SendsFeishuWebhookWhenConfigured(t *testing.T) {
 	var webhookCalls int
-	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	client := &http.Client{Transport: feishuRoundTripFunc(func(r *http.Request) (*http.Response, error) {
 		webhookCalls++
 		return &http.Response{
 			StatusCode: http.StatusOK,
@@ -180,7 +180,7 @@ func TestMaybeSendAlertEmail_SendsFeishuWebhookWhenConfigured(t *testing.T) {
 
 func TestMaybeSendAlertEmail_SendsFeishuWhenEmailDisabledForRule(t *testing.T) {
 	var webhookCalls int
-	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	client := &http.Client{Transport: feishuRoundTripFunc(func(r *http.Request) (*http.Response, error) {
 		webhookCalls++
 		return &http.Response{
 			StatusCode: http.StatusOK,
@@ -223,7 +223,7 @@ func TestMaybeSendAlertEmail_SendsFeishuWhenEmailDisabledForRule(t *testing.T) {
 
 func TestMaybeSendAlertEmail_DoesNotSendFeishuWhenRuleDisablesFeishu(t *testing.T) {
 	var webhookCalls int
-	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	client := &http.Client{Transport: feishuRoundTripFunc(func(r *http.Request) (*http.Response, error) {
 		webhookCalls++
 		return &http.Response{
 			StatusCode: http.StatusOK,
@@ -305,8 +305,8 @@ func TestHandleFeishuAlertCardAction_ManualResolvesEvent(t *testing.T) {
 	}
 }
 
-type roundTripFunc func(*http.Request) (*http.Response, error)
+type feishuRoundTripFunc func(*http.Request) (*http.Response, error)
 
-func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+func (f feishuRoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return f(req)
 }
